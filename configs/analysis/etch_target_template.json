@@ -1,0 +1,13 @@
+{
+  "milestone": 2,
+  "primary_target": "stepheight",
+  "targets": [
+    "stepheight",
+    "oxide_etch",
+    "si_etch"
+  ],
+  "representative_wafer": "2024-07-02_01",
+  "outer_split": "leave_one_lot_out",
+  "template_dominance_threshold": 0.95,
+  "raw_map_r2_headline_allowed_when_template_dominant": false
+}

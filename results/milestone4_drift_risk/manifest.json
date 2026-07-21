@@ -1,0 +1,46 @@
+{
+  "milestone": 4,
+  "analysis": "target_free_drift_and_failure_risk",
+  "configuration": {
+    "milestone": 4,
+    "outer_split": "leave_one_lot_out",
+    "pca_components": 10,
+    "ewma_alpha": 0.3,
+    "budgets": [
+      0.0,
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9
+    ],
+    "random_replicates": 10000,
+    "random_seed": 20260721,
+    "minimum_aurc_reduction": 0.1,
+    "minimum_improved_lots": 7
+  },
+  "lot_macro_aurc": {
+    "combined": 0.1234003974248837,
+    "delta": 0.1300006571509048,
+    "disagreement": 0.12671730796819464,
+    "ewma": 0.1333364681127247,
+    "ood": 0.1274243205108812,
+    "oracle": 0.08762186262186172,
+    "periodic": 0.13162125287262172,
+    "random": 0.13968392737097995
+  },
+  "combined_vs_random_aurc_reduction": 0.11657411308925747,
+  "combined_improved_lots": 9,
+  "total_lots": 10,
+  "preregistered_gate_passed": true,
+  "claim_boundary": {
+    "risk_score_is_calibrated_uncertainty": false,
+    "ewma_is_a_production_ooc_limit": false,
+    "held_out_target_used_to_construct_risk": false,
+    "test_target_used_only_for_retrospective_scoring": true
+  }
+}

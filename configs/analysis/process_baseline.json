@@ -1,0 +1,13 @@
+{
+  "milestone": 3,
+  "target": "stepheight",
+  "outer_split": "leave_one_lot_out",
+  "inner_split": "leave_one_lot_out_within_outer_training_lots",
+  "families": ["ridge", "pls"],
+  "ridge_parameters": [0.1, 1.0, 10.0, 100.0, 1000.0],
+  "pls_parameters": [1, 2, 4],
+  "residual_variance_target": 0.9,
+  "maximum_residual_components": 8,
+  "bootstrap_replicates": 10000,
+  "random_seed": 20260720
+}

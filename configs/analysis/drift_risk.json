@@ -1,0 +1,11 @@
+{
+  "milestone": 4,
+  "outer_split": "leave_one_lot_out",
+  "pca_components": 10,
+  "ewma_alpha": 0.3,
+  "budgets": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+  "random_replicates": 10000,
+  "random_seed": 20260721,
+  "minimum_aurc_reduction": 0.1,
+  "minimum_improved_lots": 7
+}
