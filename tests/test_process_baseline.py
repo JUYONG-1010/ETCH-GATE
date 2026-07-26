@@ -3,6 +3,7 @@ import pandas as pd
 
 from etch_gate.analysis.process_baseline import (
     GPRSettings,
+    decompose_maps,
     evaluate_process_baselines,
     fit_residual_basis,
     prepare_feature_transform,
@@ -50,6 +51,21 @@ def test_residual_basis_has_bounded_components() -> None:
 
     assert 1 <= len(basis.components) <= 2
     assert basis.inverse_transform(basis.transform(residuals)).shape == residuals.shape
+
+
+def test_map_decomposition_reconstructs_every_training_map_exactly() -> None:
+    maps = np.array(
+        [
+            [10.0, 11.0, 12.0],
+            [10.5, 11.6, 12.4],
+            [9.8, 10.7, 11.9],
+        ]
+    )
+
+    reference, template, shifts, _, residuals, _ = decompose_maps(maps, maps)
+    reconstructed = reference + template + shifts[:, None] + residuals
+
+    assert np.allclose(reconstructed, maps)
 
 
 def test_nested_lolo_returns_every_wafer_and_stage() -> None:

@@ -579,3 +579,58 @@ main stepheight VM claim. Its scope, leakage controls, numerical metrics,
 required OES-and-wafer-map visualizations, and claim boundary are recorded in
 `TODO.md`. It uses only the four downloaded OES days and cannot be used to
 retroactively claim that OES improves stepheight prediction.
+
+## 2026-07-26 - Full Revision, Causal Audit, And Reproduction
+
+Completed the repository-wide revision master protocol except the explicitly
+excluded employment/interview deliverables. The initial audit recorded 14
+claim, leakage, robustness, and reproducibility gaps in
+`docs/REVISION_AUDIT.md`.
+
+Validated phase/cycle detection on all 96 process wafers and selected the
+target-free complementary detector. It finds 99-100 cycles per wafer with no
+phase overlap or uncovered active samples. Corrected the process baseline
+runner so this selected detector is used consistently.
+
+Added cumulative feature ablation, fold-wise PLS VIP and coefficient stability,
+and sensor-family dependence. Level-only features achieved 0.1328 um
+lot-macro MAE, while all 310 features achieved 0.1421 um. Phase features help
+the preceding cumulative set, but cycle-behavior features degrade it.
+
+Separated template, predicted mean, predicted residual, oracle mean, and oracle
+residual stages. The deployable residual correction improves lot-macro MAE by
+9.68%, with a lot-cluster 95% interval of 7.03%-12.66% and improvement in all
+10 lots. Strict expanding-window PLS is 0.1737 um versus eligible-lot LOLO
+0.1446 um, a 20.15% temporal degradation.
+
+Corrected first-wafer drift scoring: delta and EWMA are neutral 0.5, while
+initial-state distance is separate. The configured EWMA alpha is now used and
+0.1/0.3/0.5 sensitivity is reported. With the corrected feature pipeline,
+static equal-weight risk reduces AURC by 9.28% versus Random and improves 8/10
+lots, but fails the preregistered 10% gate and its lot-bootstrap interval
+crosses zero. Inner-lot learned weights are unstable and rejected.
+
+Implemented true chronological selective-metrology replay. At 10%, 20%, and
+30% budgets, combined routing changes total system MAE by +1.89%, +4.94%, and
+-2.12% versus Random. Only 3/7, 3/7, and 2/7 lots improve, all bootstrap
+intervals cross zero, and excluding Lot 8 reverses the average direction. The
+causal policy gate fails. Scalar F1 bias feedback gives only a 0.97% mean gain;
+more complex refits are not retained.
+
+Implemented prior-lot split conformal point and simultaneous map intervals.
+The 95% point coverage is 88.87%; the 95% rank is unattainable in all seven
+evaluated calibration/test splits, and simultaneous intervals widen to 10.28
+um on average. The uncertainty gate fails and uncertainty is excluded from
+routing.
+
+Rewrote README to contain only the research, six core figures, supported
+claims, failed gates, reproduction, and explicit forbidden claims. Added
+claim verification, GitHub Actions for Python 3.10/3.11, shared statistics and
+manifest utilities, validation checks, and a miniature synthetic end-to-end
+test.
+
+The raw-input full reproduction ran 11 stages successfully in approximately
+7 minutes 56 seconds. A second run reused all 11 stages from matching
+input/config/script hashes and artifacts. Claim audit passed 14/14 checks.
+Final completion and NOT RUN audit are in `docs/FINAL_VALIDATION_REPORT.md`;
+there are no NOT RUN items, and Section 17 is recorded as explicitly excluded.

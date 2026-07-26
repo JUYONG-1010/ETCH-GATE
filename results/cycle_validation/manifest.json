@@ -1,0 +1,23 @@
+{
+  "analysis": "actual_wafer_cycle_validation",
+  "configuration": {
+    "detectors": [
+      "quantile",
+      "complementary",
+      "duration_filtered",
+      "period_constrained"
+    ],
+    "minimum_phase_duration_seconds": 0.5,
+    "expected_cycle_period_seconds": 6.0,
+    "expected_cycle_count": 100,
+    "accepted_cycle_count_minimum": 95,
+    "accepted_cycle_count_maximum": 105
+  },
+  "selected_detector": "complementary",
+  "process_wafers": 96,
+  "pass_fail_gate": "PASS",
+  "claim_boundaries": [
+    "target-free process segmentation only",
+    "no plasma-chemistry or endpoint claim"
+  ]
+}

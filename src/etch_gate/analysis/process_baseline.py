@@ -76,9 +76,29 @@ class PCAGaussianProcess:
         )
 
 
+def validate_feature_table(feature_table: pd.DataFrame) -> None:
+    """Reject ambiguous experiment keys and non-finite model inputs."""
+
+    if not feature_table.index.is_unique:
+        duplicates = feature_table.index[feature_table.index.duplicated()].unique()
+        raise ValueError(f"duplicate experiment keys: {duplicates[:3].tolist()}")
+    if feature_table.index.hasnans:
+        raise ValueError("experiment keys must not be missing")
+    values = feature_table.to_numpy(dtype=float)
+    if values.ndim != 2 or not values.shape[1]:
+        raise ValueError("feature table must contain at least one feature column")
+    if not np.isfinite(values).all():
+        raise ValueError("feature table contains non-finite values")
+
+
 def prepare_feature_transform(values: np.ndarray) -> FeatureTransform:
     """Fit constant removal and z-score scaling using training wafers only."""
 
+    values = np.asarray(values, dtype=float)
+    if values.ndim != 2 or len(values) < 2:
+        raise ValueError("training features must be a 2D matrix with at least two rows")
+    if not np.isfinite(values).all():
+        raise ValueError("training features must be finite")
     retained = np.var(values, axis=0) > 1e-12
     if not retained.any():
         raise ValueError("all process features are constant in this training fold")
@@ -191,6 +211,32 @@ def _fitted_model_label(
     return None
 
 
+def fit_regressor(
+    family: str,
+    parameter: float | GPRSettings,
+    features: np.ndarray,
+    targets: np.ndarray,
+) -> Ridge | PLSRegression | PCAGaussianProcess:
+    """Public, validated entry point for the shared regression implementation."""
+
+    if features.ndim != 2 or len(features) != len(targets):
+        raise ValueError("features and targets must have aligned sample rows")
+    if not np.isfinite(features).all() or not np.isfinite(targets).all():
+        raise ValueError("regression inputs must be finite")
+    return _fit_regressor(family, parameter, features, targets)
+
+
+def predict_regressor(
+    model: Ridge | PLSRegression | PCAGaussianProcess,
+    features: np.ndarray,
+) -> np.ndarray:
+    """Return a stable two-dimensional prediction array."""
+
+    if features.ndim != 2 or not np.isfinite(features).all():
+        raise ValueError("prediction features must be a finite matrix")
+    return _predict(model, features)
+
+
 def _decompose_maps(
     training_maps: np.ndarray,
     evaluation_maps: np.ndarray,
@@ -226,6 +272,28 @@ def _decompose_maps(
         training_residual,
         evaluation_residual,
     )
+
+
+def decompose_maps(
+    training_maps: np.ndarray,
+    evaluation_maps: np.ndarray,
+) -> tuple[
+    float,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+]:
+    """Public training-template decomposition with shape and finite checks."""
+
+    if training_maps.ndim != 2 or evaluation_maps.ndim != 2:
+        raise ValueError("wafer maps must be two-dimensional matrices")
+    if training_maps.shape[1] != evaluation_maps.shape[1]:
+        raise ValueError("training and evaluation maps must share coordinates")
+    if not np.isfinite(training_maps).all() or not np.isfinite(evaluation_maps).all():
+        raise ValueError("wafer maps must be finite")
+    return _decompose_maps(training_maps, evaluation_maps)
 
 
 def _inner_score(
@@ -310,6 +378,31 @@ def _select_parameter(
     return selected, float(score)
 
 
+def select_parameter(
+    features: np.ndarray,
+    maps: np.ndarray,
+    lots: np.ndarray,
+    *,
+    family: str,
+    parameters: list[float | GPRSettings],
+    target_part: str,
+    variance_target: float,
+    maximum_components: int,
+) -> tuple[float | GPRSettings, float]:
+    """Public grouped-inner-validation model selection entry point."""
+
+    return _select_parameter(
+        features,
+        maps,
+        lots,
+        family=family,
+        parameters=parameters,
+        target_part=target_part,
+        variance_target=variance_target,
+        maximum_components=maximum_components,
+    )
+
+
 def _ordered_dense_maps(
     dense: pd.DataFrame,
     feature_keys: set[str],
@@ -319,6 +412,21 @@ def _ordered_dense_maps(
     if missing:
         raise ValueError(f"dense table is missing columns: {missing}")
     dense = dense[dense["experiment_key"].isin(feature_keys)].copy()
+    if not len(dense):
+        raise ValueError("dense table has no rows matching the requested feature keys")
+    duplicated = dense.duplicated(["experiment_key", "X", "Y"], keep=False)
+    if duplicated.any():
+        examples = (
+            dense.loc[duplicated, ["experiment_key", "X", "Y"]]
+            .drop_duplicates()
+            .head(3)
+            .to_dict(orient="records")
+        )
+        raise ValueError(f"dense table contains duplicate wafer coordinates: {examples}")
+    lot_counts = dense.groupby("experiment_key")["lot_number"].nunique()
+    if (lot_counts != 1).any():
+        invalid = lot_counts[lot_counts != 1].index.tolist()
+        raise ValueError(f"experiment keys assigned to multiple lots: {invalid[:3]}")
     coordinates = (
         dense[["X", "Y"]].drop_duplicates().sort_values(["Y", "X"]).reset_index(drop=True)
     )
@@ -344,6 +452,15 @@ def _ordered_dense_maps(
     )
 
 
+def ordered_dense_maps(
+    dense: pd.DataFrame,
+    feature_keys: set[str],
+) -> tuple[pd.DataFrame, np.ndarray, np.ndarray, np.ndarray]:
+    """Public complete-grid dense-map loader."""
+
+    return _ordered_dense_maps(dense, feature_keys)
+
+
 def evaluate_process_baselines(
     feature_table: pd.DataFrame,
     dense: pd.DataFrame,
@@ -359,6 +476,7 @@ def evaluate_process_baselines(
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Evaluate template, mean-shift, and full-map models with nested LOLO."""
 
+    validate_feature_table(feature_table)
     wafer_rows, coordinates, maps, lots = _ordered_dense_maps(
         dense, set(feature_table.index)
     )

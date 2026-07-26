@@ -1,0 +1,162 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "id": "process_wafer_count",
+      "source": "C:/Users/\uc8fc\uc6a9/Desktop/Project_2/results/revised_process_baseline/manifest.json",
+      "artifact_value": 96,
+      "expected_readme_text": "96 process wafers",
+      "status": "PASS"
+    },
+    {
+      "id": "dense_wafer_count",
+      "source": "C:/Users/\uc8fc\uc6a9/Desktop/Project_2/results/revised_process_baseline/manifest.json",
+      "artifact_value": 88,
+      "expected_readme_text": "88 labeled wafers",
+      "status": "PASS"
+    },
+    {
+      "id": "direct_target_count",
+      "source": "C:/Users/\uc8fc\uc6a9/Desktop/Project_2/outputs/target_template/manifest.json",
+      "artifact_value": 7832,
+      "expected_readme_text": "7,832 targets",
+      "status": "PASS"
+    },
+    {
+      "id": "signal_feature_count",
+      "source": "C:/Users/\uc8fc\uc6a9/Desktop/Project_2/results/revised_process_baseline/manifest.json",
+      "artifact_value": {
+        "process_wafers": 96,
+        "modeled_dense_wafers": 88,
+        "lots": 10,
+        "raw_common_signals": 31,
+        "engineered_features": 310
+      },
+      "expected_readme_text": "31 common signals",
+      "status": "PASS"
+    },
+    {
+      "id": "template_r2",
+      "source": "C:/Users/\uc8fc\uc6a9/Desktop/Project_2/outputs/target_template/manifest.json",
+      "artifact_value": 0.982595724554012,
+      "expected_readme_text": "98.26% of raw point variance",
+      "status": "PASS"
+    },
+    {
+      "id": "template_mae",
+      "source": "C:/Users/\uc8fc\uc6a9/Desktop/Project_2/outputs/target_template/manifest.json",
+      "artifact_value": 0.35088005018411544,
+      "expected_readme_text": "0.3509 um",
+      "status": "PASS"
+    },
+    {
+      "id": "model_mae",
+      "source": "C:/Users/\uc8fc\uc6a9/Desktop/Project_2/results/revised_process_baseline/model_summary.csv",
+      "artifact_value": {
+        "pls": 0.1458517160803569,
+        "ridge": 0.1555228021590613,
+        "gpr": 0.170277181082656
+      },
+      "expected_readme_text": "| **PLS** | **0.1459 um** | **0.1421 um** | **8/10** |",
+      "status": "PASS"
+    },
+    {
+      "id": "residual_gain",
+      "source": "C:/Users/\uc8fc\uc6a9/Desktop/Project_2/results/spatial_decomposition/summary.json",
+      "artifact_value": {
+        "status": "PASS",
+        "relative_residual_stage_gain": 0.09683225322342393,
+        "lot_cluster_bootstrap_95_interval": [
+          0.07026407889475236,
+          0.12663864857577373
+        ],
+        "lots_improved": 10,
+        "total_lots": 10,
+        "bootstrap_replicates": 10000,
+        "random_seed": 20260726
+      },
+      "expected_readme_text": "Residual correction adds a 9.68% gain",
+      "status": "PASS"
+    },
+    {
+      "id": "chronological_degradation",
+      "source": "C:/Users/\uc8fc\uc6a9/Desktop/Project_2/results/chronological_vm/summary.json",
+      "artifact_value": {
+        "scope": "macro",
+        "family": "pls",
+        "lot_number": NaN,
+        "lolo_mae": 0.14456810534717526,
+        "chronological_mae": 0.17369843616464958,
+        "relative_degradation": 0.2014990149280773
+      },
+      "expected_readme_text": "Forward error is 20.15% higher.",
+      "status": "PASS"
+    },
+    {
+      "id": "oes_failure",
+      "source": "C:/Users/\uc8fc\uc6a9/Desktop/Project_2/results/oes_v2_pilot/summary.json",
+      "artifact_value": {
+        "selected_lots": [
+          2,
+          4,
+          6,
+          9
+        ],
+        "dense_wafers": 39,
+        "oes_shape_features": 21888,
+        "physics_constrained_lot_macro_mae": 0.41415539216300296,
+        "process_only_lot_macro_mae": 0.3387214048525108,
+        "lot_macro_relative_mae_reduction": -0.22270215649152236,
+        "lots_improved": 1,
+        "total_lots": 4,
+        "retain_gate": {
+          "relative_mae_reduction_minimum": 0.05,
+          "lots_improved_minimum": 3,
+          "total_pilot_lots": 4
+        },
+        "passes_retain_gate": false
+      },
+      "expected_readme_text": "0.4142 um lot-macro MAE versus 0.3387 um",
+      "status": "PASS"
+    },
+    {
+      "id": "risk_aurc",
+      "source": "C:/Users/\uc8fc\uc6a9/Desktop/Project_2/results/risk_audit/manifest.json",
+      "artifact_value": {
+        "combined": 0.1287481015254027,
+        "random": 0.14191073227819412,
+        "reduction": 0.09275289149370403,
+        "gate": false
+      },
+      "expected_readme_text": "| Equal-weight combined | **0.1287** | **9.28%** |",
+      "status": "PASS"
+    },
+    {
+      "id": "low_budget_causal_result",
+      "source": "C:/Users/\uc8fc\uc6a9/Desktop/Project_2/results/causal_replay/manifest.json",
+      "artifact_value": {
+        "0.1": 0.01889088776222425,
+        "0.2": 0.04937245448567662,
+        "0.3": -0.02123744289802798
+      },
+      "expected_readme_text": "| 20% | 4.94% better |",
+      "status": "PASS"
+    },
+    {
+      "id": "causal_gate",
+      "source": "C:/Users/\uc8fc\uc6a9/Desktop/Project_2/results/causal_replay/manifest.json",
+      "artifact_value": "FAIL",
+      "expected_readme_text": "The causal policy gate is **FAIL**",
+      "status": "PASS"
+    },
+    {
+      "id": "uncertainty_gate",
+      "source": "C:/Users/\uc8fc\uc6a9/Desktop/Project_2/results/uncertainty_calibration/manifest.json",
+      "artifact_value": "FAIL",
+      "expected_readme_text": "Group-aware split conformal evaluation also fails",
+      "status": "PASS"
+    }
+  ],
+  "checked_claims": 14,
+  "failed_claims": 0
+}

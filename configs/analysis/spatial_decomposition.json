@@ -1,0 +1,9 @@
+{
+  "cycle_detector": "complementary",
+  "model_family": "pls",
+  "pls_parameters": [1, 2, 4],
+  "residual_variance_target": 0.9,
+  "maximum_residual_components": 8,
+  "bootstrap_replicates": 10000,
+  "random_seed": 20260726
+}

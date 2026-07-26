@@ -37,6 +37,8 @@ class ProcessRegions:
     cycle_count: int
     active_start_seconds: float
     active_end_seconds: float
+    rising_edge_indices: np.ndarray
+    detector: str
 
 
 def load_process_traces(
@@ -83,7 +85,69 @@ def _signal_threshold(values: np.ndarray) -> float:
     return float(low + 0.5 * (high - low))
 
 
-def detect_process_regions(trace: ProcessTrace) -> ProcessRegions:
+def _normalized_phase_signal(values: np.ndarray) -> np.ndarray:
+    low, high = np.quantile(values, [0.05, 0.95])
+    scale = high - low
+    if scale <= 1e-12:
+        return np.zeros_like(values, dtype=float)
+    return np.clip((values - low) / scale, 0.0, 1.0)
+
+
+def _remove_short_runs(
+    mask: np.ndarray,
+    times: np.ndarray,
+    minimum_duration_seconds: float,
+) -> np.ndarray:
+    result = mask.copy()
+    changes = np.flatnonzero(np.diff(np.r_[False, mask, False].astype(int)))
+    for start, stop in changes.reshape(-1, 2):
+        duration = times[stop - 1] - times[start]
+        if duration < minimum_duration_seconds:
+            result[start:stop] = False
+    return result
+
+
+def _phase_masks(
+    trace: ProcessTrace,
+    active: np.ndarray,
+    *,
+    detector: str,
+    minimum_phase_duration_seconds: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    long_signal = trace.values[LONG_PHASE_GAS].to_numpy(dtype=float)
+    short_signal = trace.values[SHORT_PHASE_GAS].to_numpy(dtype=float)
+    if detector == "quantile":
+        long_phase = active & (long_signal > _signal_threshold(long_signal))
+        short_phase = active & (short_signal > _signal_threshold(short_signal))
+        return long_phase, short_phase
+
+    if detector not in {"complementary", "duration_filtered", "period_constrained"}:
+        raise ValueError(f"unknown process-region detector: {detector}")
+
+    long_normalized = _normalized_phase_signal(long_signal)
+    short_normalized = _normalized_phase_signal(short_signal)
+    long_phase = active & (long_normalized >= short_normalized)
+    short_phase = active & ~long_phase
+    if detector in {"duration_filtered", "period_constrained"}:
+        long_phase = _remove_short_runs(
+            long_phase, trace.times, minimum_phase_duration_seconds
+        )
+        short_phase = _remove_short_runs(
+            short_phase, trace.times, minimum_phase_duration_seconds
+        )
+        unresolved = active & ~long_phase & ~short_phase
+        long_phase[unresolved] = long_normalized[unresolved] >= short_normalized[unresolved]
+        short_phase[unresolved] = ~long_phase[unresolved]
+    return long_phase, short_phase
+
+
+def detect_process_regions(
+    trace: ProcessTrace,
+    *,
+    detector: str = "quantile",
+    minimum_phase_duration_seconds: float = 0.5,
+    expected_cycle_period_seconds: float = 6.0,
+) -> ProcessRegions:
     """Detect the active RF window and long/short gas phases from real timestamps."""
 
     required = {SOURCE_RF, LONG_PHASE_GAS, SHORT_PHASE_GAS}
@@ -106,23 +170,27 @@ def detect_process_regions(trace: ProcessTrace) -> ProcessRegions:
     active = np.zeros(len(trace.times), dtype=bool)
     active[active_start_index : active_end_index + 1] = True
 
-    long_phase_signal = trace.values[LONG_PHASE_GAS].to_numpy(dtype=float)
-    short_phase_signal = trace.values[SHORT_PHASE_GAS].to_numpy(dtype=float)
-    long_phase = active & (
-        long_phase_signal > _signal_threshold(long_phase_signal)
-    )
-    short_phase = active & (
-        short_phase_signal > _signal_threshold(short_phase_signal)
+    long_phase, short_phase = _phase_masks(
+        trace,
+        active,
+        detector=detector,
+        minimum_phase_duration_seconds=minimum_phase_duration_seconds,
     )
 
     rising_edges = np.flatnonzero(
         long_phase & ~np.r_[False, long_phase[:-1]]
     )
     retained_edges = []
+    minimum_edge_spacing = (
+        0.5 * expected_cycle_period_seconds
+        if detector == "period_constrained"
+        else 3.0
+    )
     for edge in rising_edges:
         if (
             not retained_edges
-            or trace.times[edge] - trace.times[retained_edges[-1]] > 3.0
+            or trace.times[edge] - trace.times[retained_edges[-1]]
+            > minimum_edge_spacing
         ):
             retained_edges.append(int(edge))
     if len(retained_edges) < 2:
@@ -142,6 +210,8 @@ def detect_process_regions(trace: ProcessTrace) -> ProcessRegions:
         cycle_count=len(retained_edges),
         active_start_seconds=float(trace.times[active_start_index]),
         active_end_seconds=float(trace.times[active_end_index]),
+        rising_edge_indices=np.asarray(retained_edges, dtype=int),
+        detector=detector,
     )
 
 
@@ -243,6 +313,8 @@ def extract_trace_features(
 
 def build_process_feature_table(
     traces: dict[str, ProcessTrace],
+    *,
+    detector: str = "quantile",
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Create one fixed-width process-feature row and one diagnostic row per wafer."""
 
@@ -250,7 +322,7 @@ def build_process_feature_table(
     diagnostic_rows = []
     for key in sorted(traces):
         trace = traces[key]
-        regions = detect_process_regions(trace)
+        regions = detect_process_regions(trace, detector=detector)
         features, diagnostics = extract_trace_features(trace, regions)
         feature_rows.append({"experiment_key": key, **features})
         diagnostic_rows.append({"experiment_key": key, **diagnostics})

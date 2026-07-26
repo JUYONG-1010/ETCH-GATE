@@ -1,0 +1,22 @@
+{
+  "cycle_detector": "complementary",
+  "minimum_training_lots": 3,
+  "budgets": [0.0, 0.1, 0.2, 0.3, 0.5],
+  "pls_parameters": [1, 2, 4],
+  "ridge_parameters": [0.1, 1.0, 10.0, 100.0, 1000.0],
+  "residual_variance_target": 0.9,
+  "maximum_residual_components": 8,
+  "risk_pca_components": 10,
+  "ewma_alpha": 0.3,
+  "bias_update_alpha": 0.3,
+  "ood_initial_redundancy_threshold": 0.9,
+  "online_controller": {
+    "threshold": "outer-training empirical percentile >= 1 - budget",
+    "prefix_cap": "ceil(budget * observed wafer count)",
+    "end_of_lot_quota": "round(budget * released lot size)",
+    "future_risk_ranking_used": false
+  },
+  "random_replicates": 100,
+  "lot_cluster_bootstrap_replicates": 10000,
+  "random_seed": 20260721
+}

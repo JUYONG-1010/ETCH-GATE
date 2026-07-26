@@ -1,0 +1,32 @@
+{
+  "analysis": "mean_shift_residual_oracle_decomposition",
+  "configuration": {
+    "cycle_detector": "complementary",
+    "model_family": "pls",
+    "pls_parameters": [
+      1,
+      2,
+      4
+    ],
+    "residual_variance_target": 0.9,
+    "maximum_residual_components": 8,
+    "bootstrap_replicates": 10000,
+    "random_seed": 20260726
+  },
+  "residual_contribution_gate": {
+    "status": "PASS",
+    "relative_residual_stage_gain": 0.09683225322342393,
+    "lot_cluster_bootstrap_95_interval": [
+      0.07026407889475236,
+      0.12663864857577373
+    ],
+    "lots_improved": 10,
+    "total_lots": 10,
+    "bootstrap_replicates": 10000,
+    "random_seed": 20260726
+  },
+  "claim_boundaries": [
+    "oracle stages are non-deployable upper bounds",
+    "spatial contribution follows the frozen gate"
+  ]
+}

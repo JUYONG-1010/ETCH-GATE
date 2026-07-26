@@ -1,0 +1,74 @@
+{
+  "milestone": 4,
+  "analysis": "target_free_drift_and_failure_risk",
+  "configuration": {
+    "milestone": 4,
+    "outer_split": "leave_one_lot_out",
+    "pca_components": 10,
+    "ewma_alpha": 0.3,
+    "ewma_sensitivity_alphas": [
+      0.1,
+      0.3,
+      0.5
+    ],
+    "first_wafer_rule": {
+      "delta_percentile": 0.5,
+      "ewma_percentile": 0.5,
+      "initial_state_distance": "distance_to_outer_training_pca_centroid"
+    },
+    "ood_initial_redundancy_threshold": 0.9,
+    "budgets": [
+      0.0,
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9
+    ],
+    "random_replicates": 10000,
+    "lot_cluster_bootstrap_replicates": 10000,
+    "random_seed": 20260721,
+    "minimum_aurc_reduction": 0.1,
+    "minimum_improved_lots": 7
+  },
+  "lot_macro_aurc": {
+    "combined": 0.1287481015254027,
+    "delta": 0.13153310596005105,
+    "disagreement": 0.13206918849484356,
+    "ewma": 0.13699055249822495,
+    "initial_state": 0.13709290084999784,
+    "ood": 0.13277229021958542,
+    "oracle": 0.08867626540731603,
+    "periodic": 0.13350152467318666,
+    "random": 0.14191073227819412,
+    "training_weighted_candidate": 0.14056215242875097
+  },
+  "combined_vs_random_aurc_reduction": 0.09275289149370403,
+  "combined_improved_lots": 8,
+  "total_lots": 10,
+  "preregistered_gate_passed": false,
+  "first_wafer_rule": {
+    "delta_percentile": 0.5,
+    "ewma_percentile": 0.5,
+    "initial_state_distance": "distance_to_outer_training_pca_centroid"
+  },
+  "ewma_alpha_selection": {
+    "selected": 0.3,
+    "selection_basis": "preregistered_before_test_scoring",
+    "sensitivity_only": [
+      0.1,
+      0.3,
+      0.5
+    ]
+  },
+  "claim_boundary": {
+    "risk_score_is_calibrated_uncertainty": false,
+    "ewma_is_a_production_ooc_limit": false,
+    "held_out_target_used_to_construct_risk": false,
+    "test_target_used_only_for_retrospective_scoring": true
+  }
+}

@@ -1,0 +1,224 @@
+{
+  "milestone": 3,
+  "analysis": "nested_lolo_process_virtual_metrology",
+  "configuration": {
+    "milestone": 3,
+    "target": "stepheight",
+    "cycle_detector": "complementary",
+    "outer_split": "leave_one_lot_out",
+    "inner_split": "leave_one_lot_out_within_outer_training_lots",
+    "families": [
+      "ridge",
+      "pls",
+      "gpr"
+    ],
+    "ridge_parameters": [
+      0.1,
+      1.0,
+      10.0,
+      100.0,
+      1000.0
+    ],
+    "pls_parameters": [
+      1,
+      2,
+      4
+    ],
+    "gpr_parameters": [
+      {
+        "pca_components": 4,
+        "length_scale": 2.0,
+        "noise_level": 0.05,
+        "optimize_kernel": true
+      },
+      {
+        "pca_components": 8,
+        "length_scale": 3.0,
+        "noise_level": 0.05,
+        "optimize_kernel": true
+      },
+      {
+        "pca_components": 16,
+        "length_scale": 4.0,
+        "noise_level": 0.05,
+        "optimize_kernel": true
+      }
+    ],
+    "residual_variance_target": 0.9,
+    "maximum_residual_components": 8,
+    "bootstrap_replicates": 10000,
+    "random_seed": 20260720
+  },
+  "source_sha256": {
+    "process": "fd304fbc08a9641f182f71f11064b8fe00a01c24a100ae8211536ad0cd404f49",
+    "dictionary": "51c9bebfad14f0a0558bf8e5831579b6a3308a2ff5b330ae5b8f8f32bc4b4302",
+    "dense_metrology": "95def8cab01f5046cdce9b6186614431e716a644fc0bd33d6e098d3768c62ad4"
+  },
+  "counts": {
+    "process_wafers": 96,
+    "modeled_dense_wafers": 88,
+    "lots": 10,
+    "raw_common_signals": 31,
+    "engineered_features": 310
+  },
+  "stage_metrics": [
+    {
+      "family": "gpr",
+      "stage": "full_map",
+      "wafer_mean_mae": 0.1702771810826561,
+      "wafer_mean_rmse": 0.23643036246225482,
+      "wafer_median_mae": 0.13239876681384533
+    },
+    {
+      "family": "gpr",
+      "stage": "mean_shift",
+      "wafer_mean_mae": 0.17762304700626863,
+      "wafer_mean_rmse": 0.23389288001929145,
+      "wafer_median_mae": 0.13643986090468582
+    },
+    {
+      "family": "gpr",
+      "stage": "template",
+      "wafer_mean_mae": 0.3520144117265253,
+      "wafer_mean_rmse": 0.39506693450073604,
+      "wafer_median_mae": 0.33312488105397153
+    },
+    {
+      "family": "pls",
+      "stage": "full_map",
+      "wafer_mean_mae": 0.14585171608035694,
+      "wafer_mean_rmse": 0.20043288841721738,
+      "wafer_median_mae": 0.1104312385926223
+    },
+    {
+      "family": "pls",
+      "stage": "mean_shift",
+      "wafer_mean_mae": 0.16085373896590566,
+      "wafer_mean_rmse": 0.2169750218607258,
+      "wafer_median_mae": 0.12785418439656526
+    },
+    {
+      "family": "pls",
+      "stage": "template",
+      "wafer_mean_mae": 0.3520144117265253,
+      "wafer_mean_rmse": 0.39506693450073604,
+      "wafer_median_mae": 0.33312488105397153
+    },
+    {
+      "family": "ridge",
+      "stage": "full_map",
+      "wafer_mean_mae": 0.15552280215906136,
+      "wafer_mean_rmse": 0.21010839257190206,
+      "wafer_median_mae": 0.12784882857044474
+    },
+    {
+      "family": "ridge",
+      "stage": "mean_shift",
+      "wafer_mean_mae": 0.16801143006877847,
+      "wafer_mean_rmse": 0.2243141204156995,
+      "wafer_median_mae": 0.1380234521786024
+    },
+    {
+      "family": "ridge",
+      "stage": "template",
+      "wafer_mean_mae": 0.3520144117265253,
+      "wafer_mean_rmse": 0.39506693450073604,
+      "wafer_median_mae": 0.33312488105397153
+    }
+  ],
+  "lot_macro_metrics": [
+    {
+      "family": "gpr",
+      "stage": "full_map",
+      "lot_macro_mae": 0.16659674230199548
+    },
+    {
+      "family": "gpr",
+      "stage": "mean_shift",
+      "lot_macro_mae": 0.17316861102091338
+    },
+    {
+      "family": "gpr",
+      "stage": "template",
+      "lot_macro_mae": 0.3508800501841154
+    },
+    {
+      "family": "pls",
+      "stage": "full_map",
+      "lot_macro_mae": 0.142139670303432
+    },
+    {
+      "family": "pls",
+      "stage": "mean_shift",
+      "lot_macro_mae": 0.15737903707338013
+    },
+    {
+      "family": "pls",
+      "stage": "template",
+      "lot_macro_mae": 0.3508800501841154
+    },
+    {
+      "family": "ridge",
+      "stage": "full_map",
+      "lot_macro_mae": 0.15513276396529227
+    },
+    {
+      "family": "ridge",
+      "stage": "mean_shift",
+      "lot_macro_mae": 0.16701891668974742
+    },
+    {
+      "family": "ridge",
+      "stage": "template",
+      "lot_macro_mae": 0.3508800501841154
+    }
+  ],
+  "paired_improvement": [
+    {
+      "family": "ridge",
+      "relative_mae_reduction": 0.5581919461868945,
+      "lot_cluster_bootstrap_95_interval": [
+        0.4148510294399814,
+        0.6428975162792288
+      ],
+      "bootstrap_replicates": 10000,
+      "random_seed": 20260720,
+      "lots_full_better_than_template": 8,
+      "lots_full_better_than_mean_shift": 10,
+      "total_lots": 10
+    },
+    {
+      "family": "pls",
+      "relative_mae_reduction": 0.5856654977135796,
+      "lot_cluster_bootstrap_95_interval": [
+        0.427149984466721,
+        0.6782231551383856
+      ],
+      "bootstrap_replicates": 10000,
+      "random_seed": 20260720,
+      "lots_full_better_than_template": 9,
+      "lots_full_better_than_mean_shift": 10,
+      "total_lots": 10
+    },
+    {
+      "family": "gpr",
+      "relative_mae_reduction": 0.5162778130375472,
+      "lot_cluster_bootstrap_95_interval": [
+        0.31839945353569177,
+        0.6321949759541786
+      ],
+      "bootstrap_replicates": 10000,
+      "random_seed": 20260720,
+      "lots_full_better_than_template": 9,
+      "lots_full_better_than_mean_shift": 7,
+      "total_lots": 10
+    }
+  ],
+  "model_evaluation_runtime_seconds": 73.56658210000023,
+  "claim_boundary": {
+    "gas_channel_chemical_identity_known": false,
+    "oes_used": false,
+    "test_lot_used_for_preprocessing_or_tuning": false,
+    "production_specification_available": false
+  }
+}

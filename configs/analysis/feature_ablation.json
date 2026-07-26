@@ -1,0 +1,11 @@
+{
+  "model_family": "pls",
+  "cycle_detector": "complementary",
+  "outer_split": "leave_one_lot_out",
+  "inner_split": "leave_one_lot_out_within_outer_training_lots",
+  "pls_parameters": [1, 2, 4],
+  "ridge_parameters": [0.1, 1.0, 10.0, 100.0, 1000.0],
+  "residual_variance_target": 0.9,
+  "maximum_residual_components": 8,
+  "include_sensor_family_ablation": true
+}

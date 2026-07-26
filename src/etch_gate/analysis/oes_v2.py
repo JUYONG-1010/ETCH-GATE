@@ -11,13 +11,13 @@ from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 
 from etch_gate.analysis.process_baseline import (
-    _decompose_maps,
-    _fit_regressor,
-    _ordered_dense_maps,
-    _predict,
-    _select_parameter,
+    decompose_maps,
+    fit_regressor,
     fit_residual_basis,
+    ordered_dense_maps,
+    predict_regressor,
     prepare_feature_transform,
+    select_parameter,
 )
 
 
@@ -76,7 +76,7 @@ def _select_oes_settings(
     for held_out_lot in np.unique(lots):
         train = lots != held_out_lot
         validation = ~train
-        _, _, training_shift, validation_shift, _, _ = _decompose_maps(
+        _, _, training_shift, validation_shift, _, _ = decompose_maps(
             maps[train], maps[validation]
         )
         retained = np.var(oes[train], axis=0) > 1e-18
@@ -119,7 +119,10 @@ def evaluate_physics_constrained_oes_v2(
             "selected dense wafer is missing features: "
             f"process={missing_process}, oes={missing_oes}"
         )
-    wafer_rows, coordinates, maps, lots = _ordered_dense_maps(selected_dense, selected_keys)
+    wafer_rows, coordinates, maps, lots = ordered_dense_maps(
+        selected_dense,
+        selected_keys,
+    )
     keys = wafer_rows["experiment_key"].tolist()
     process = process_features.loc[keys].to_numpy(dtype=float)
     oes = oes_shape_features.loc[keys].to_numpy(dtype=float)
@@ -135,7 +138,7 @@ def evaluate_physics_constrained_oes_v2(
     for held_out_lot in np.unique(lots):
         train = lots != held_out_lot
         test = ~train
-        reference, template, training_shift, _, training_residual, _ = _decompose_maps(
+        reference, template, training_shift, _, training_residual, _ = decompose_maps(
             maps[train], maps[test]
         )
         baseline = np.broadcast_to(reference + template, maps[test].shape)
@@ -149,7 +152,7 @@ def evaluate_physics_constrained_oes_v2(
         process_transform = prepare_feature_transform(process[train])
         process_train = process_transform.apply(process[train])
         process_test = process_transform.apply(process[test])
-        residual_parameter, residual_inner_rmse = _select_parameter(
+        residual_parameter, residual_inner_rmse = select_parameter(
             process[train],
             maps[train],
             lots[train],
@@ -164,10 +167,12 @@ def evaluate_physics_constrained_oes_v2(
             variance_target=residual_variance_target,
             maximum_components=maximum_residual_components,
         )
-        residual_model = _fit_regressor(
+        residual_model = fit_regressor(
             "pls", residual_parameter, process_train, basis.transform(training_residual)
         )
-        residual_prediction = basis.inverse_transform(_predict(residual_model, process_test))
+        residual_prediction = basis.inverse_transform(
+            predict_regressor(residual_model, process_test)
+        )
         full_prediction = mean_prediction + residual_prediction
 
         fold_rows.append(

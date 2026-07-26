@@ -9,7 +9,10 @@ from pathlib import Path
 import pandas as pd
 
 from etch_gate.analysis.drift import evaluate_drift_risk
-from etch_gate.visualization.drift import plot_failure_risk_dashboard
+from etch_gate.visualization.drift import (
+    plot_failure_risk_dashboard,
+    plot_risk_robustness_dashboard,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -39,11 +42,31 @@ def main() -> None:
         budgets=tuple(config["budgets"]),
         random_replicates=config["random_replicates"],
         random_seed=config["random_seed"],
+        redundancy_threshold=config["ood_initial_redundancy_threshold"],
+        bootstrap_replicates=config["lot_cluster_bootstrap_replicates"],
     )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     result.wafer_scores.to_csv(args.output_dir / "wafer_risk_scores.csv", index=False)
     result.risk_curves.to_csv(args.output_dir / "risk_curves.csv", index=False)
     result.lot_summary.to_csv(args.output_dir / "lot_policy_summary.csv", index=False)
+    result.score_correlations.to_csv(
+        args.output_dir / "score_correlations.csv", index=False
+    )
+    result.alpha_sensitivity.to_csv(
+        args.output_dir / "ewma_alpha_sensitivity.csv", index=False
+    )
+    result.influence_summary.to_csv(
+        args.output_dir / "lot_influence_summary.csv", index=False
+    )
+    result.bootstrap_summary.to_csv(
+        args.output_dir / "bootstrap_summary.csv", index=False
+    )
+    result.small_lot_resolution.to_csv(
+        args.output_dir / "small_lot_resolution.csv", index=False
+    )
+    result.weight_selection.to_csv(
+        args.output_dir / "training_weight_selection.csv", index=False
+    )
 
     macro = result.lot_summary.groupby("policy")["aurc"].mean()
     random_aurc = float(macro["random"])
@@ -63,6 +86,12 @@ def main() -> None:
         "combined_improved_lots": improved_lots,
         "total_lots": int(paired.shape[0]),
         "preregistered_gate_passed": passed,
+        "first_wafer_rule": config["first_wafer_rule"],
+        "ewma_alpha_selection": {
+            "selected": config["ewma_alpha"],
+            "selection_basis": "preregistered_before_test_scoring",
+            "sensitivity_only": config["ewma_sensitivity_alphas"],
+        },
         "claim_boundary": {
             "risk_score_is_calibrated_uncertainty": False,
             "ewma_is_a_production_ooc_limit": False,
@@ -80,6 +109,14 @@ def main() -> None:
         args.figure_dir / "failure-risk-dashboard.png",
         minimum_reduction=config["minimum_aurc_reduction"],
         minimum_lots=config["minimum_improved_lots"],
+    )
+    plot_risk_robustness_dashboard(
+        result.wafer_scores,
+        result.influence_summary,
+        result.bootstrap_summary,
+        result.score_correlations,
+        dense,
+        args.figure_dir / "risk-robustness-dashboard.png",
     )
 
 

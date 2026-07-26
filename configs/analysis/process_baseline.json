@@ -1,6 +1,7 @@
 {
   "milestone": 3,
   "target": "stepheight",
+  "cycle_detector": "complementary",
   "outer_split": "leave_one_lot_out",
   "inner_split": "leave_one_lot_out_within_outer_training_lots",
   "families": ["ridge", "pls", "gpr"],

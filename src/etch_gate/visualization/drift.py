@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.lines import Line2D
+from matplotlib.patches import Circle
 
 COLORS = {
     "random": "#9AA3AE",
@@ -201,6 +202,161 @@ def plot_failure_risk_dashboard(
         0.025,
         "Outer leave-one-lot-out. Risk scaling uses outer-training wafers only. "
         "Oracle is an unattainable upper bound.",
+        fontsize=9,
+        color="#66747D",
+    )
+    fig.savefig(output_path, dpi=220, bbox_inches="tight", facecolor=fig.get_facecolor())
+    plt.close(fig)
+
+
+def plot_risk_robustness_dashboard(
+    wafer_scores: pd.DataFrame,
+    influence: pd.DataFrame,
+    bootstrap: pd.DataFrame,
+    correlations: pd.DataFrame,
+    dense: pd.DataFrame,
+    output_path: Path,
+) -> None:
+    """Visualize lot influence, uncertainty, proxy overlap, and a real wafer map."""
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig = plt.figure(figsize=(16, 11), facecolor="#F4F6F3")
+    grid = fig.add_gridspec(2, 2, hspace=0.32, wspace=0.26)
+    ax_influence = fig.add_subplot(grid[0, 0])
+    ax_bootstrap = fig.add_subplot(grid[0, 1])
+    ax_correlation = fig.add_subplot(grid[1, 0])
+    ax_wafer = fig.add_subplot(grid[1, 1])
+    for axis in (ax_influence, ax_bootstrap, ax_correlation, ax_wafer):
+        axis.set_facecolor("white")
+        axis.spines[["top", "right"]].set_visible(False)
+
+    combined = influence[influence["policy"] == "combined"].copy()
+    combined["label"] = combined["removed_lot"].replace({"none": "All lots"})
+    combined.loc[combined["removed_lot"] != "none", "label"] = (
+        "Remove Lot " + combined.loc[combined["removed_lot"] != "none", "removed_lot"]
+    )
+    values = 100 * combined["relative_reduction_vs_random"].to_numpy()
+    positions = np.arange(len(combined))
+    colors = [
+        "#E46C4C" if label == "Remove Lot 8" else "#007F5F"
+        for label in combined["label"]
+    ]
+    ax_influence.barh(positions, values, color=colors, edgecolor="white")
+    ax_influence.set_yticks(positions, combined["label"])
+    ax_influence.invert_yaxis()
+    ax_influence.axvline(0, color="#52616B", linewidth=1)
+    ax_influence.set_xlabel("Combined AURC reduction vs Random (%)")
+    ax_influence.set_title("A  Does one lot create the headline?", loc="left")
+    ax_influence.grid(axis="x", color="#E7EBE8", linewidth=0.8)
+
+    selected = bootstrap[
+        bootstrap["policy"].isin(["ood", "disagreement", "combined", "oracle"])
+    ].copy()
+    y = np.arange(len(selected))
+    centers = selected["bootstrap_mean_difference"].to_numpy()
+    lower = centers - selected["bootstrap_p025"].to_numpy()
+    upper = selected["bootstrap_p975"].to_numpy() - centers
+    ax_bootstrap.errorbar(
+        centers,
+        y,
+        xerr=np.vstack([lower, upper]),
+        fmt="o",
+        color="#172A3A",
+        ecolor="#237A8B",
+        capsize=5,
+        linewidth=2,
+    )
+    ax_bootstrap.axvline(0, color="#B9482E", linestyle="--")
+    ax_bootstrap.set_yticks(y, selected["policy"].str.title())
+    ax_bootstrap.set_xlabel("Policy AURC - Random AURC (lower is better)")
+    ax_bootstrap.set_title("B  Lot-cluster bootstrap, 95% interval", loc="left")
+    ax_bootstrap.grid(axis="x", color="#E7EBE8", linewidth=0.8)
+
+    train_corr = (
+        correlations[correlations["split"] == "train"]
+        .groupby(["score_a", "score_b"], as_index=False)["spearman"]
+        .mean()
+    )
+    names = ["ood", "initial_state", "delta", "ewma", "disagreement"]
+    matrix = np.eye(len(names))
+    for row in train_corr.itertuples():
+        left = names.index(row.score_a)
+        right = names.index(row.score_b)
+        matrix[left, right] = row.spearman
+        matrix[right, left] = row.spearman
+    image = ax_correlation.imshow(
+        matrix,
+        vmin=-1,
+        vmax=1,
+        cmap="RdBu_r",
+        aspect="equal",
+    )
+    ax_correlation.set_xticks(
+        np.arange(len(names)),
+        [name.replace("_", "\n") for name in names],
+    )
+    ax_correlation.set_yticks(np.arange(len(names)), names)
+    for row in range(len(names)):
+        for column in range(len(names)):
+            ax_correlation.text(
+                column,
+                row,
+                f"{matrix[row, column]:.2f}",
+                ha="center",
+                va="center",
+                color="white" if abs(matrix[row, column]) > 0.55 else "#172A3A",
+                fontsize=9,
+            )
+    ax_correlation.set_title("C  Training-side proxy overlap", loc="left")
+    fig.colorbar(image, ax=ax_correlation, fraction=0.045, pad=0.03)
+
+    worst = wafer_scores.loc[wafer_scores["true_pls_mae"].idxmax()]
+    wafer = dense[dense["experiment_key"] == worst["experiment_key"]]
+    values = wafer["stepheight"].to_numpy(dtype=float)
+    scatter = ax_wafer.scatter(
+        wafer["X"],
+        wafer["Y"],
+        c=values,
+        cmap="viridis",
+        s=120,
+        edgecolors="white",
+        linewidths=0.7,
+    )
+    radius = float(
+        np.sqrt(np.square(wafer["X"]) + np.square(wafer["Y"])).max()
+    )
+    ax_wafer.add_patch(
+        Circle((0, 0), radius * 1.04, fill=False, color="#172A3A", linewidth=1.5)
+    )
+    ax_wafer.set_aspect("equal")
+    ax_wafer.set_xlabel("X (mm)")
+    ax_wafer.set_ylabel("Y (mm)")
+    ax_wafer.set_title(
+        f"D  Measured map of highest-error wafer | Lot {int(worst['lot_number'])}",
+        loc="left",
+    )
+    colorbar = fig.colorbar(scatter, ax=ax_wafer, fraction=0.045, pad=0.03)
+    colorbar.set_label("Measured step height (um)")
+
+    fig.text(
+        0.055,
+        0.965,
+        "ETCH-GATE | RISK ROBUSTNESS AUDIT",
+        fontsize=20,
+        weight="bold",
+        color="#172A3A",
+    )
+    fig.text(
+        0.055,
+        0.934,
+        "First-wafer correction, lot influence, proxy redundancy, and finite-sample limits",
+        fontsize=11,
+        color="#52616B",
+    )
+    fig.text(
+        0.055,
+        0.025,
+        "Bootstrap resamples whole lots. The wafer map is measured context, not a risk heatmap.",
         fontsize=9,
         color="#66747D",
     )

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from etch_gate.visualization.model_benchmark import _wafer_map
+from etch_gate.visualization.model_benchmark import plot_wafer_map
 
 INK = "#17212B"
 MUTED = "#66717E"
@@ -131,7 +131,7 @@ def plot_oes_v2_dashboard(
     map_grid = grid[1, :].subgridspec(1, 5, wspace=0.38)
     for index, (table, value, title, cmap, centered) in enumerate(maps):
         axis = figure.add_subplot(map_grid[0, index])
-        _wafer_map(
+        plot_wafer_map(
             axis,
             table,
             value,

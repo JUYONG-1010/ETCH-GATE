@@ -1,0 +1,5 @@
+detector,detector_order,wafer_count,median_cycle_count,minimum_cycle_count,maximum_cycle_count,outside_95_105,median_absolute_cycle_deviation,mean_phase_overlap_fraction,mean_uncovered_active_fraction
+quantile,0,96,100.0,99,100,0,0.0,0.0,0.06629157144414627
+complementary,1,96,100.0,99,100,0,0.0,0.0,0.0
+duration_filtered,2,96,100.0,99,100,0,0.0,0.0,0.0
+period_constrained,3,96,100.0,99,100,0,0.0,0.0,0.0

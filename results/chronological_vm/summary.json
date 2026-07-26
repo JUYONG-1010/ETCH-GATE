@@ -1,0 +1,74 @@
+{
+  "analysis": "nested_lolo_vs_expanding_window_vm",
+  "configuration": {
+    "cycle_detector": "complementary",
+    "minimum_training_lots": 3,
+    "families": [
+      "ridge",
+      "pls",
+      "gpr"
+    ],
+    "ridge_parameters": [
+      0.1,
+      1.0,
+      10.0,
+      100.0,
+      1000.0
+    ],
+    "pls_parameters": [
+      1,
+      2,
+      4
+    ],
+    "gpr_parameters": [
+      {
+        "pca_components": 8,
+        "length_scale": 3.0,
+        "noise_level": 0.05,
+        "optimize_kernel": true
+      }
+    ],
+    "residual_variance_target": 0.9,
+    "maximum_residual_components": 8
+  },
+  "eligible_test_lots": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "family_macro_comparison": [
+    {
+      "scope": "macro",
+      "family": "gpr",
+      "lot_number": NaN,
+      "lolo_mae": 0.19083905915591165,
+      "chronological_mae": 0.21018270311698414,
+      "relative_degradation": 0.10136103189058976
+    },
+    {
+      "scope": "macro",
+      "family": "pls",
+      "lot_number": NaN,
+      "lolo_mae": 0.14456810534717526,
+      "chronological_mae": 0.17369843616464958,
+      "relative_degradation": 0.2014990149280773
+    },
+    {
+      "scope": "macro",
+      "family": "ridge",
+      "lot_number": NaN,
+      "lolo_mae": 0.15665422025922585,
+      "chronological_mae": 0.1937373608222985,
+      "relative_degradation": 0.236719703444368
+    }
+  ],
+  "claim_boundaries": [
+    "LOLO evaluates domain generalization",
+    "expanding-window evaluates strict forward deployment",
+    "neither establishes production suitability"
+  ]
+}

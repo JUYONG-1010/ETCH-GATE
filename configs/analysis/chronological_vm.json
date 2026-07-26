@@ -1,0 +1,17 @@
+{
+  "cycle_detector": "complementary",
+  "minimum_training_lots": 3,
+  "families": ["ridge", "pls", "gpr"],
+  "ridge_parameters": [0.1, 1.0, 10.0, 100.0, 1000.0],
+  "pls_parameters": [1, 2, 4],
+  "gpr_parameters": [
+    {
+      "pca_components": 8,
+      "length_scale": 3.0,
+      "noise_level": 0.05,
+      "optimize_kernel": true
+    }
+  ],
+  "residual_variance_target": 0.9,
+  "maximum_residual_components": 8
+}

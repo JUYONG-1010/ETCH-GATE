@@ -93,7 +93,10 @@ def main() -> None:
         args.data_dir / "Process_data.nc",
         args.data_dir / "Dictionary_process.nc",
     )
-    features, diagnostics = build_process_feature_table(traces)
+    features, diagnostics = build_process_feature_table(
+        traces,
+        detector=config["cycle_detector"],
+    )
     dense_path = args.data_dir / "Si_Oxide_etch_89_points.csv"
     dense = pd.read_csv(dense_path)
     points, wafers, folds = evaluate_process_baselines(

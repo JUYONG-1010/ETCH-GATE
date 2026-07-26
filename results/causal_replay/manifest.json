@@ -1,0 +1,81 @@
+{
+  "analysis": "strict_chronological_causal_selective_metrology",
+  "configuration": {
+    "cycle_detector": "complementary",
+    "minimum_training_lots": 3,
+    "budgets": [
+      0.0,
+      0.1,
+      0.2,
+      0.3,
+      0.5
+    ],
+    "pls_parameters": [
+      1,
+      2,
+      4
+    ],
+    "ridge_parameters": [
+      0.1,
+      1.0,
+      10.0,
+      100.0,
+      1000.0
+    ],
+    "residual_variance_target": 0.9,
+    "maximum_residual_components": 8,
+    "risk_pca_components": 10,
+    "ewma_alpha": 0.3,
+    "bias_update_alpha": 0.3,
+    "ood_initial_redundancy_threshold": 0.9,
+    "online_controller": {
+      "threshold": "outer-training empirical percentile >= 1 - budget",
+      "prefix_cap": "ceil(budget * observed wafer count)",
+      "end_of_lot_quota": "round(budget * released lot size)",
+      "future_risk_ranking_used": false
+    },
+    "random_replicates": 100,
+    "lot_cluster_bootstrap_replicates": 10000,
+    "random_seed": 20260721
+  },
+  "combined_vs_random_system_mae_reduction": {
+    "0.1": 0.01889088776222425,
+    "0.2": 0.04937245448567662,
+    "0.3": -0.02123744289802798
+  },
+  "feedback_mean_relative_gain_vs_frozen": {
+    "F1": 0.00969569322276138,
+    "F2": -0.020162097261035617,
+    "F3": -0.001039779995779777
+  },
+  "combined_lot_win_fraction": {
+    "0.1": 0.42857142857142855,
+    "0.2": 0.42857142857142855,
+    "0.3": 0.2857142857142857
+  },
+  "combined_minus_random_mae_without_lot8": {
+    "0.1": -0.0028952131480667865,
+    "0.2": -0.002150256881842607,
+    "0.3": -0.008869162885144057
+  },
+  "worst_lot_relative_change": {
+    "0.1": -0.0038197234292930426,
+    "0.2": 0.06131034724903506,
+    "0.3": 0.06293945452881688
+  },
+  "policy_gate_checks": {
+    "at_least_two_low_budgets_improve_random": true,
+    "bootstrap_improvement_interval_not_cross_zero": false,
+    "at_least_70_percent_lots_equal_or_better": false,
+    "lot8_excluded_direction_remains_better": false,
+    "worst_lot_not_degraded_more_than_10_percent": true
+  },
+  "policy_gate": "FAIL",
+  "validated_combined_definition": "equal-weight combined; training-weight candidate was rejected by the separate risk audit",
+  "claim_boundaries": [
+    "direct measurement is treated as error-free substitution",
+    "oracle uses target and is not deployable",
+    "released lot size is known to the quota controller",
+    "future process scores and future metrology targets are not ranked"
+  ]
+}

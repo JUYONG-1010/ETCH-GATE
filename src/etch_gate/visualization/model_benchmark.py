@@ -18,7 +18,7 @@ GOLD = "#E8A317"
 PALE = "#F3F6F7"
 
 
-def _wafer_map(
+def plot_wafer_map(
     axis: plt.Axes,
     table: pd.DataFrame,
     value: str,
@@ -218,7 +218,7 @@ def plot_model_benchmark_dashboard(
     map_grid = grid[1, :].subgridspec(1, 5, wspace=0.35)
     for index, (table, value, title, cmap, centered) in enumerate(map_tables):
         axis = figure.add_subplot(map_grid[0, index])
-        _wafer_map(
+        plot_wafer_map(
             axis,
             table,
             value,

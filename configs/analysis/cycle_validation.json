@@ -1,0 +1,13 @@
+{
+  "detectors": [
+    "quantile",
+    "complementary",
+    "duration_filtered",
+    "period_constrained"
+  ],
+  "minimum_phase_duration_seconds": 0.5,
+  "expected_cycle_period_seconds": 6.0,
+  "expected_cycle_count": 100,
+  "accepted_cycle_count_minimum": 95,
+  "accepted_cycle_count_maximum": 105
+}

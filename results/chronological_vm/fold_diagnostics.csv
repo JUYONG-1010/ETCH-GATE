@@ -1,0 +1,22 @@
+test_lot,family,training_lots,maximum_training_lot,training_wafers,test_wafers,retained_features,mean_parameter,mean_inner_lot_macro_mae,residual_parameter,residual_inner_lot_macro_rmse,residual_components
+4,ridge,"1,2,3",3,29,10,241,10.0,0.16763224597697204,1000.0,0.259301914637212,3
+4,pls,"1,2,3",3,29,10,241,2,0.14652916698220483,1,0.30618090494993605,3
+4,gpr,"1,2,3",3,29,10,241,"GPRSettings(pca_components=8, length_scale=3.0, noise_level=0.05, optimize_kernel=True)",0.1377187797152348,"GPRSettings(pca_components=8, length_scale=3.0, noise_level=0.05, optimize_kernel=True)",0.2579318204021905,3
+5,ridge,"1,2,3,4",4,39,10,241,100.0,0.1445656671757069,1000.0,0.24629834851100996,3
+5,pls,"1,2,3,4",4,39,10,241,2,0.11689202456083012,1,0.2827822355415778,3
+5,gpr,"1,2,3,4",4,39,10,241,"GPRSettings(pca_components=8, length_scale=3.0, noise_level=0.05, optimize_kernel=True)",0.1395371707956473,"GPRSettings(pca_components=8, length_scale=3.0, noise_level=0.05, optimize_kernel=True)",0.2551768733200838,3
+6,ridge,"1,2,3,4,5",5,49,10,241,10.0,0.12916860409529551,1000.0,0.1890418853710638,3
+6,pls,"1,2,3,4,5",5,49,10,241,4,0.11844567900830812,1,0.18723192771653793,3
+6,gpr,"1,2,3,4,5",5,49,10,241,"GPRSettings(pca_components=8, length_scale=3.0, noise_level=0.05, optimize_kernel=True)",0.13070728349757052,"GPRSettings(pca_components=8, length_scale=3.0, noise_level=0.05, optimize_kernel=True)",0.22364011373054488,3
+7,ridge,"1,2,3,4,5,6",6,59,6,241,10.0,0.12345748305990249,1000.0,0.24880762705648082,3
+7,pls,"1,2,3,4,5,6",6,59,6,241,4,0.12704007009401716,1,0.260350076050784,3
+7,gpr,"1,2,3,4,5,6",6,59,6,241,"GPRSettings(pca_components=8, length_scale=3.0, noise_level=0.05, optimize_kernel=True)",0.148509859725761,"GPRSettings(pca_components=8, length_scale=3.0, noise_level=0.05, optimize_kernel=True)",0.26544850986645213,3
+8,ridge,"1,2,3,4,5,6,7",7,65,10,241,100.0,0.13088206261074892,1000.0,0.22676029398426786,3
+8,pls,"1,2,3,4,5,6,7",7,65,10,241,4,0.1257604365154531,1,0.2336132137075298,3
+8,gpr,"1,2,3,4,5,6,7",7,65,10,241,"GPRSettings(pca_components=8, length_scale=3.0, noise_level=0.05, optimize_kernel=True)",0.1537015983249044,"GPRSettings(pca_components=8, length_scale=3.0, noise_level=0.05, optimize_kernel=True)",0.23980085273313928,3
+9,ridge,"1,2,3,4,5,6,7,8",8,75,9,241,100.0,0.13741249367615727,1000.0,0.2085661741577723,3
+9,pls,"1,2,3,4,5,6,7,8",8,75,9,241,4,0.13587770496785856,1,0.21111712098541177,3
+9,gpr,"1,2,3,4,5,6,7,8",8,75,9,241,"GPRSettings(pca_components=8, length_scale=3.0, noise_level=0.05, optimize_kernel=True)",0.20711374022851387,"GPRSettings(pca_components=8, length_scale=3.0, noise_level=0.05, optimize_kernel=True)",0.23942942834873313,3
+10,ridge,"1,2,3,4,5,6,7,8,9",9,84,4,241,100.0,0.13018859625708887,1000.0,0.19471261923163838,3
+10,pls,"1,2,3,4,5,6,7,8,9",9,84,4,241,4,0.12592228460713106,1,0.19416883353186734,3
+10,gpr,"1,2,3,4,5,6,7,8,9",9,84,4,241,"GPRSettings(pca_components=8, length_scale=3.0, noise_level=0.05, optimize_kernel=True)",0.17640802461060417,"GPRSettings(pca_components=8, length_scale=3.0, noise_level=0.05, optimize_kernel=True)",0.22315959227824692,3

@@ -1,0 +1,12 @@
+{
+  "cycle_detector": "complementary",
+  "split": "past_fit_lots_then_immediately_prior_calibration_lot_then_test_lot",
+  "minimum_fit_lots": 2,
+  "nominal_coverages": [0.8, 0.9, 0.95],
+  "pls_parameters": [1, 2, 4],
+  "residual_variance_target": 0.9,
+  "maximum_residual_components": 8,
+  "maximum_coverage_shortfall": 0.05,
+  "minimum_stable_lot_fraction": 0.7,
+  "maximum_half_width_to_template_mae": 1.0
+}

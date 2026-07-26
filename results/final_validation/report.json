@@ -1,0 +1,26 @@
+{
+  "overall_status": "QUALIFIED",
+  "not_run_items": [],
+  "excluded_items": [
+    "Section 17 employment and interview deliverables"
+  ],
+  "gates": {
+    "cycle_segmentation": "PASS",
+    "residual_spatial_contribution": "PASS",
+    "static_risk_ranking": "FAIL",
+    "causal_selective_metrology": "FAIL",
+    "uncertainty_calibration": "FAIL",
+    "oes_incremental_value": "FAIL",
+    "claim_audit": "PASS"
+  },
+  "verification": {
+    "full_reproduction": "PASS",
+    "reproduction_cache": "11/11 REUSED",
+    "ruff": "PASS",
+    "tests": "41/41 PASS",
+    "claim_checks": "14/14 PASS",
+    "commit_performed": false,
+    "push_performed": false
+  },
+  "claim_boundary": "Failed gates are retained as negative results and are not promoted to deployment claims."
+}
