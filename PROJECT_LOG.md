@@ -470,3 +470,112 @@ real measured-wafer metrology atlas rather than a generated workflow diagram.
 The README remains unpushed under the agreed final-only Git policy, so the new
 local figures cannot appear in the remote GitHub repository until that final
 push occurs.
+
+## 2026-07-21 - Ridge, PLS, And GPR Process-Model Gate
+
+Added a leakage-safe GPR path to the existing nested leave-one-lot-out process
+benchmark. GPR applies whitened input PCA inside each training fold, selects 4,
+8, or 16 components by inner lot-wise validation, and optimizes a
+Constant-RBF-White kernel without access to the outer test lot. Tests verify
+that changing a held-out lot's target by 1,000 um changes neither its GPR
+prediction nor its raw predictive standard deviation.
+
+Rejected the initial fixed-kernel pilot because selected length scales reached
+the search boundary. The fair kernel-optimized rerun reduced GPR MAE from the
+pilot's 0.1940 um to 0.1574 um, but PLS remained better at 0.1435 um. GPR was
+9.7% worse overall with a paired lot-cluster bootstrap 95% degradation interval
+of 3.6%-16.1%; PLS beat GPR in nine of ten held-out lots. GPR did not repair Lot
+8.
+
+Raw GPR uncertainty was also rejected for routing: wafer-level Spearman rho
+with observed MAE was 0.144 (p=0.181), top-20% high-error capture was 33.3%, and
+raw nominal 95% point coverage was 88.5%. PLS remains the frozen process-only
+baseline. Added reproducible result tables, a benchmark audit, tests, and a
+README-ready dashboard with equal-scale measured/predicted/error wafer maps.
+
+## 2026-07-21 - One-Day OES Integrity And Alignment Gate
+
+Clarified that OES is additional in-situ sensing rather than additional
+post-process metrology. Downloaded the preregistered July 5 representative file
+as a temporary part, verified its official MD5, and retained the raw NetCDF only
+after the hash matched.
+
+All ten Lot 2 wafer groups pass dictionary-code, shared-wavelength,
+strict-timestamp, process-duration, active-window, process-key, and direct-target
+availability checks. The release contains 3,648 shared wavelengths from 185.891
+to 883.967 nm. Actual median sampling is 24.05 Hz; the largest gap is 1.307 s,
+so every downstream summary must use timestamps rather than assume exact 25 Hz.
+OES/process regular-duration mismatch is at most 0.737 s.
+
+Implemented a streaming target-free extractor. It aligns OES to process time
+and produces active mean/std, early-late change, long/short Bosch-phase means,
+phase difference, and cycle-mean slope for every wavelength. This yields 25,536
+candidate features per wafer and processes the ten-wafer file in 19.9 seconds
+without loading the full day into memory. No stepheight relationship or model
+accuracy is reported from one lot.
+
+Preregistered a four-lot pilot using Lots 2, 4, 6, and 9 before observing an OES
+model result. The download gate requires at least 5% lot-macro MAE reduction and
+improvement in at least three of four lots. Additional pilot files remain
+pending; no one-lot result can satisfy this gate.
+
+## 2026-07-26 - Four-Lot OES Incremental-Value Pilot
+
+Downloaded the preregistered Lot 4, Lot 6, and Lot 9 OES files from the Zenodo
+record. Each was retained only after its official MD5 matched; SHA-256 values
+were recorded locally in `data/bosch_raw/checksums.sha256`. All three files
+passed the same schema, timestamp, wavelength-axis, dictionary, process-window,
+and target-availability gate as Lot 2.
+
+Extracted 25,536 target-free OES features per wafer (seven phase/cycle-aware
+statistics across 3,648 wavelengths) for the four preregistered lots. In a
+nested leave-one-lot-out PLS comparison on 39 dense wafers, process-only
+lot-macro full-map MAE was 0.3387 um; process plus OES was 0.3444 um. This is a
+-1.68% reduction (an error increase), and only 2/4 held-out lots improved.
+
+The preregistered retain gate required >=5% reduction and >=3/4 lots improved;
+it failed both. The responsible decision is not to download the remaining OES
+days for the same raw-statistics fusion design. Added reproducible extraction,
+evaluation, dashboard, raw hashes, and `docs/OES_PILOT_RESULTS.md`. The next
+candidate is a compact OES representation pre-registered against this negative
+baseline, not a post-hoc claim that OES improved virtual metrology.
+
+## 2026-07-26 - Visualization And OES V2 Working Rule
+
+Added a project-wide rule that future result visualizations include wafer maps
+where a wafer-map target is evaluated. Recorded the rule in the OES V2 protocol:
+matched-scale measured, process-only predicted, constrained predicted, and both
+error maps are required for every V2 result dashboard.
+
+Preregistered the next hypothesis before fitting it: OES will estimate only the
+wafer-global stepheight mean shift after broadband normalization and
+training-fold-only compact SVD/PCA; the frozen process-only model retains the
+spatial-residual prediction. The V1 gate (>=5% lot-macro MAE reduction and
+improvement in >=3/4 held-out lots) remains unchanged.
+
+## 2026-07-26 - Physics-Constrained OES V2 Result
+
+Implemented and evaluated the preregistered V2 hypothesis. Every OES row was
+normalized by broadband intensity so the compact representation emphasizes
+spectral shape rather than absolute optical brightness. Six aligned summaries
+(active, early, late, long phase, short phase, and cycle slope) formed 21,888
+candidate shape features. Standardization and PCA (2, 4, or 8 components) were
+fit only inside training lots; inner leave-one-lot-out selection chose the PCA
+rank and Ridge penalty for OES mean shift. The process-only PLS retained the
+spatial residual prediction.
+
+V2 produced a lot-macro full-map MAE of 0.4142 um versus 0.3387 um for
+process-only PLS, a -22.27% reduction (worse), and improved only 1/4 lots. It
+therefore fails the same preregistered gate more clearly than V1. Added an
+auditable dashboard with measured/predicted/error wafer maps selected by the
+predefined median-improvement rule, plus a unit test that confirms every
+selected wafer is retained. No remaining OES days will be downloaded for this
+target.
+
+## 2026-07-26 - Deferred OES Mini Project
+
+Separated a possible OES cycle-aware process-state monitoring analysis from the
+main stepheight VM claim. Its scope, leakage controls, numerical metrics,
+required OES-and-wafer-map visualizations, and claim boundary are recorded in
+`TODO.md`. It uses only the four downloaded OES days and cannot be used to
+retroactively claim that OES improves stepheight prediction.

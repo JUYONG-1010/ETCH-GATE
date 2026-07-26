@@ -8,6 +8,8 @@ import numpy as np
 import pandas as pd
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.decomposition import PCA
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import RBF, ConstantKernel, WhiteKernel
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 
@@ -36,6 +38,42 @@ class ResidualBasis:
 
     def inverse_transform(self, scores: np.ndarray) -> np.ndarray:
         return scores @ self.components + self.mean
+
+
+@dataclass(frozen=True)
+class GPRSettings:
+    """Fixed candidate selected by the inner lot-wise validation loop."""
+
+    pca_components: int
+    length_scale: float
+    noise_level: float
+    optimize_kernel: bool = False
+
+    @property
+    def label(self) -> str:
+        return (
+            f"pca={self.pca_components};length={self.length_scale:g};"
+            f"noise={self.noise_level:g};optimize={self.optimize_kernel}"
+        )
+
+
+@dataclass(frozen=True)
+class PCAGaussianProcess:
+    """Training-only PCA followed by a fixed-kernel multi-output GPR."""
+
+    pca: PCA
+    regressor: GaussianProcessRegressor
+
+    def predict(
+        self,
+        features: np.ndarray,
+        *,
+        return_std: bool = False,
+    ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+        return self.regressor.predict(
+            self.pca.transform(features),
+            return_std=return_std,
+        )
 
 
 def prepare_feature_transform(values: np.ndarray) -> FeatureTransform:
@@ -71,23 +109,86 @@ def fit_residual_basis(
 
 def _fit_regressor(
     family: str,
-    parameter: float,
+    parameter: float | GPRSettings,
     features: np.ndarray,
     targets: np.ndarray,
-) -> Ridge | PLSRegression:
+) -> Ridge | PLSRegression | PCAGaussianProcess:
     if family == "ridge":
-        model = Ridge(alpha=parameter)
+        if isinstance(parameter, GPRSettings):
+            raise TypeError("Ridge parameter must be a float")
+        model = Ridge(alpha=float(parameter))
     elif family == "pls":
+        if isinstance(parameter, GPRSettings):
+            raise TypeError("PLS parameter must be a float")
         components = min(int(parameter), features.shape[1], len(features) - 1)
         model = PLSRegression(n_components=components, scale=False, max_iter=1000)
+    elif family == "gpr":
+        if not isinstance(parameter, GPRSettings):
+            raise TypeError("GPR parameter must be GPRSettings")
+        component_count = min(
+            parameter.pca_components,
+            features.shape[1],
+            len(features) - 1,
+        )
+        pca = PCA(n_components=component_count, whiten=True, svd_solver="full").fit(
+            features
+        )
+        constant_bounds: tuple[float, float] | str = (
+            (1e-3, 1e3) if parameter.optimize_kernel else "fixed"
+        )
+        length_bounds: tuple[float, float] | str = (
+            (1e-2, 1e3) if parameter.optimize_kernel else "fixed"
+        )
+        noise_bounds: tuple[float, float] | str = (
+            (1e-5, 1e1) if parameter.optimize_kernel else "fixed"
+        )
+        kernel = (
+            ConstantKernel(1.0, constant_value_bounds=constant_bounds)
+            * RBF(parameter.length_scale, length_scale_bounds=length_bounds)
+            + WhiteKernel(parameter.noise_level, noise_level_bounds=noise_bounds)
+        )
+        regressor = GaussianProcessRegressor(
+            kernel=kernel,
+            optimizer="fmin_l_bfgs_b" if parameter.optimize_kernel else None,
+            normalize_y=True,
+            random_state=0,
+        ).fit(pca.transform(features), targets)
+        return PCAGaussianProcess(pca=pca, regressor=regressor)
     else:
         raise ValueError(f"unknown model family: {family}")
     return model.fit(features, targets)
 
 
-def _predict(model: Ridge | PLSRegression, features: np.ndarray) -> np.ndarray:
+def _predict(
+    model: Ridge | PLSRegression | PCAGaussianProcess,
+    features: np.ndarray,
+) -> np.ndarray:
     prediction = np.asarray(model.predict(features))
     return prediction.reshape(len(features), -1)
+
+
+def _predict_with_std(
+    model: Ridge | PLSRegression | PCAGaussianProcess,
+    features: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray | None]:
+    if not isinstance(model, PCAGaussianProcess):
+        return _predict(model, features), None
+    prediction, standard_deviation = model.predict(features, return_std=True)
+    prediction = np.asarray(prediction).reshape(len(features), -1)
+    standard_deviation = np.asarray(standard_deviation).reshape(len(features), -1)
+    return prediction, standard_deviation
+
+
+def _parameter_label(parameter: float | GPRSettings) -> float | str:
+    return parameter.label if isinstance(parameter, GPRSettings) else parameter
+
+
+def _fitted_model_label(
+    model: Ridge | PLSRegression | PCAGaussianProcess,
+) -> str | None:
+    if isinstance(model, PCAGaussianProcess):
+        return str(model.regressor.kernel_)
+    return None
 
 
 def _decompose_maps(
@@ -133,7 +234,7 @@ def _inner_score(
     lots: np.ndarray,
     *,
     family: str,
-    parameter: float,
+    parameter: float | GPRSettings,
     target_part: str,
     variance_target: float,
     maximum_components: int,
@@ -181,13 +282,15 @@ def _select_parameter(
     lots: np.ndarray,
     *,
     family: str,
-    parameters: list[float],
+    parameters: list[float | GPRSettings],
     target_part: str,
     variance_target: float,
     maximum_components: int,
-) -> tuple[float, float]:
-    scores = {
-        parameter: _inner_score(
+) -> tuple[float | GPRSettings, float]:
+    scored = [
+        (
+            parameter,
+            _inner_score(
             features,
             maps,
             lots,
@@ -196,11 +299,15 @@ def _select_parameter(
             target_part=target_part,
             variance_target=variance_target,
             maximum_components=maximum_components,
+            ),
         )
         for parameter in parameters
-    }
-    selected = min(scores, key=lambda value: (scores[value], value))
-    return float(selected), float(scores[selected])
+    ]
+    selected, score = min(
+        scored,
+        key=lambda item: (item[1], str(_parameter_label(item[0]))),
+    )
+    return selected, float(score)
 
 
 def _ordered_dense_maps(
@@ -244,6 +351,9 @@ def evaluate_process_baselines(
     families: tuple[str, ...] = ("ridge", "pls"),
     ridge_parameters: tuple[float, ...] = (0.1, 1.0, 10.0, 100.0, 1000.0),
     pls_parameters: tuple[float, ...] = (1.0, 2.0, 4.0),
+    gpr_parameters: tuple[GPRSettings, ...] = (
+        GPRSettings(pca_components=8, length_scale=2.0, noise_level=0.05),
+    ),
     residual_variance_target: float = 0.90,
     maximum_residual_components: int = 8,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -277,9 +387,14 @@ def evaluate_process_baselines(
         baseline = np.broadcast_to(reference + template, maps[test].shape)
 
         for family in families:
-            parameters = (
-                list(ridge_parameters) if family == "ridge" else list(pls_parameters)
-            )
+            if family == "ridge":
+                parameters: list[float | GPRSettings] = list(ridge_parameters)
+            elif family == "pls":
+                parameters = list(pls_parameters)
+            elif family == "gpr":
+                parameters = list(gpr_parameters)
+            else:
+                raise ValueError(f"unknown model family: {family}")
             mean_parameter, mean_inner_mae = _select_parameter(
                 features[train],
                 maps[train],
@@ -303,8 +418,17 @@ def evaluate_process_baselines(
             mean_model = _fit_regressor(
                 family, mean_parameter, x_train, training_shift
             )
-            predicted_shift = _predict(mean_model, x_test)[:, 0]
+            predicted_shift_array, shift_std_array = _predict_with_std(
+                mean_model, x_test
+            )
+            predicted_shift = predicted_shift_array[:, 0]
+            shift_std = None if shift_std_array is None else shift_std_array[:, 0]
             mean_only = baseline + predicted_shift[:, None]
+            mean_only_std = (
+                None
+                if shift_std is None
+                else np.broadcast_to(shift_std[:, None], mean_only.shape)
+            )
 
             basis = fit_residual_basis(
                 training_residual,
@@ -315,10 +439,13 @@ def evaluate_process_baselines(
             residual_model = _fit_regressor(
                 family, residual_parameter, x_train, residual_scores
             )
-            predicted_residual = basis.inverse_transform(
-                _predict(residual_model, x_test)
-            )
+            predicted_scores, score_std = _predict_with_std(residual_model, x_test)
+            predicted_residual = basis.inverse_transform(predicted_scores)
             full_prediction = mean_only + predicted_residual
+            full_std = None
+            if shift_std is not None and score_std is not None:
+                residual_variance = np.square(score_std) @ np.square(basis.components)
+                full_std = np.sqrt(np.square(shift_std[:, None]) + residual_variance)
 
             fold_rows.append(
                 {
@@ -327,9 +454,11 @@ def evaluate_process_baselines(
                     "training_wafers": int(train.sum()),
                     "test_wafers": int(test.sum()),
                     "retained_features": int(transform.retained.sum()),
-                    "mean_parameter": mean_parameter,
+                    "mean_parameter": _parameter_label(mean_parameter),
+                    "mean_fitted_model": _fitted_model_label(mean_model),
                     "mean_inner_lot_macro_mae": mean_inner_mae,
-                    "residual_parameter": residual_parameter,
+                    "residual_parameter": _parameter_label(residual_parameter),
+                    "residual_fitted_model": _fitted_model_label(residual_model),
                     "residual_inner_lot_macro_rmse": residual_inner_rmse,
                     "residual_components": len(basis.components),
                     "residual_explained_variance": basis.explained_variance,
@@ -338,12 +467,17 @@ def evaluate_process_baselines(
             for local_index, global_index in enumerate(np.flatnonzero(test)):
                 observed = maps[global_index]
                 predictions = {
-                    "template": baseline[local_index],
-                    "mean_shift": mean_only[local_index],
-                    "full_map": full_prediction[local_index],
+                    "template": (baseline[local_index], None),
+                    "mean_shift": (mean_only[local_index], mean_only_std),
+                    "full_map": (full_prediction[local_index], full_std),
                 }
-                for stage, prediction in predictions.items():
+                for stage, (prediction, prediction_std) in predictions.items():
                     error = prediction - observed
+                    wafer_std = (
+                        np.nan
+                        if prediction_std is None
+                        else float(np.mean(prediction_std[local_index]))
+                    )
                     wafer_metrics.append(
                         {
                             "experiment_key": keys[global_index],
@@ -353,6 +487,7 @@ def evaluate_process_baselines(
                             "mae": float(np.mean(np.abs(error))),
                             "rmse": float(np.sqrt(np.mean(np.square(error)))),
                             "mean_error": float(prediction.mean() - observed.mean()),
+                            "mean_predicted_std": wafer_std,
                         }
                     )
                     for point, (x, y) in enumerate(coordinates):
@@ -367,6 +502,11 @@ def evaluate_process_baselines(
                                 "observed": observed[point],
                                 "predicted": prediction[point],
                                 "error": error[point],
+                                "predicted_std": (
+                                    np.nan
+                                    if prediction_std is None
+                                    else prediction_std[local_index, point]
+                                ),
                             }
                         )
 

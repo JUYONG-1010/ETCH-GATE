@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from etch_gate.analysis.process_baseline import (
+    GPRSettings,
     evaluate_process_baselines,
     fit_residual_basis,
     prepare_feature_transform,
@@ -95,3 +96,44 @@ def test_held_out_lot_targets_cannot_change_its_predictions() -> None:
     )
 
     assert np.allclose(original_lot["predicted"], perturbed_lot["predicted"])
+
+
+def test_gpr_returns_positive_uncertainty_without_test_target_access() -> None:
+    features, dense = _small_problem()
+    changed = dense.copy()
+    changed.loc[changed["lot_number"] == 0, "stepheight"] += 1000.0
+    settings = (GPRSettings(2, 2.0, 0.01),)
+
+    original, wafers, _ = evaluate_process_baselines(
+        features,
+        dense,
+        families=("gpr",),
+        gpr_parameters=settings,
+        maximum_residual_components=2,
+    )
+    perturbed, _, _ = evaluate_process_baselines(
+        features,
+        changed,
+        families=("gpr",),
+        gpr_parameters=settings,
+        maximum_residual_components=2,
+    )
+    modeled_points = original[original["stage"].isin(["mean_shift", "full_map"])]
+    assert np.isfinite(modeled_points["predicted_std"]).all()
+    assert (modeled_points["predicted_std"] > 0).all()
+    assert np.isfinite(
+        wafers.loc[wafers["stage"].isin(["mean_shift", "full_map"]), "mean_predicted_std"]
+    ).all()
+
+    original_lot = original[original["lot_number"] == 0].sort_values(
+        ["experiment_key", "stage", "X", "Y"]
+    )
+    perturbed_lot = perturbed[perturbed["lot_number"] == 0].sort_values(
+        ["experiment_key", "stage", "X", "Y"]
+    )
+    assert np.allclose(original_lot["predicted"], perturbed_lot["predicted"])
+    assert np.allclose(
+        original_lot["predicted_std"],
+        perturbed_lot["predicted_std"],
+        equal_nan=True,
+    )

@@ -1,0 +1,23 @@
+{
+  "analysis": "preregistered_four_lot_oes_incremental_value_pilot",
+  "target": "direct_89_point_stepheight",
+  "selected_lots": [2, 4, 6, 9],
+  "selected_files": [
+    "Day_2024_07_05.nc",
+    "Day_2024_07_11.nc",
+    "Day_2024_08_01.nc",
+    "Day_2024_08_21.nc"
+  ],
+  "selection_rule": "four chronologically distributed lots selected before OES model results; no target-error selection",
+  "outer_split": "leave_one_selected_lot_out",
+  "inner_split": "leave_one_training_lot_out",
+  "primary_baseline": "frozen_process_only_pls",
+  "primary_metric": "lot_macro_full_map_mae",
+  "retain_gate": {
+    "relative_mae_reduction_minimum": 0.05,
+    "lots_improved_minimum": 3,
+    "total_pilot_lots": 4
+  },
+  "failure_rule": "do not download remaining daily OES for primary modeling when either gate fails",
+  "random_seed": 20260721
+}

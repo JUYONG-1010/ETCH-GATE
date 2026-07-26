@@ -1,0 +1,19 @@
+{
+  "source_files": [
+    "Day_2024_07_05.nc"
+  ],
+  "wafers": 10,
+  "wavelength_statistics": [
+    "active_mean",
+    "active_std",
+    "early_late_delta",
+    "long_phase_mean",
+    "short_phase_mean",
+    "phase_difference",
+    "cycle_mean_slope"
+  ],
+  "features_per_wafer": 25536,
+  "target_used_during_extraction": false,
+  "elapsed_seconds": 19.855510999997932,
+  "claim_boundary": "target-free feature feasibility; one lot cannot test generalization"
+}

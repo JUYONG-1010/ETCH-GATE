@@ -1,0 +1,26 @@
+{
+  "oes_file": "Day_2024_07_11.nc",
+  "wafer_groups": 10,
+  "all_groups_pass": true,
+  "all_wavelength_axes_identical": true,
+  "all_active_windows_covered": true,
+  "wavelength_count": 3648,
+  "wavelength_range_nm": [
+    185.89122009277344,
+    883.9669552284213
+  ],
+  "maximum_timestamp_gap_seconds": 0.3589189052581787,
+  "maximum_absolute_duration_mismatch_seconds": 0.7214069366455078,
+  "claim_boundary": "one-lot integrity and alignment gate; no unseen-lot model claim",
+  "direct_target_wafers": 10,
+  "wavelength_spacing_nm": {
+    "median": 0.19160863381284798,
+    "minimum": 0.17932584165566823,
+    "maximum": 0.20270597416708824
+  },
+  "source_hashes": {
+    "oes_md5": "a32f4406f243d267a430fc9a3624ee28",
+    "oes_sha256": "49eef77dc7b082bd5c5085ec6ffe12f1ebe4bc4e9e5e9b8713fb7d945aec3888",
+    "dictionary_sha256": "238b8a9a76f4c3ffd0355864e0415c94aca6ec8d36a7b84e13f1240d3784f2bd"
+  }
+}

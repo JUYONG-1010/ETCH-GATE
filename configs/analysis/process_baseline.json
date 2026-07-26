@@ -3,9 +3,14 @@
   "target": "stepheight",
   "outer_split": "leave_one_lot_out",
   "inner_split": "leave_one_lot_out_within_outer_training_lots",
-  "families": ["ridge", "pls"],
+  "families": ["ridge", "pls", "gpr"],
   "ridge_parameters": [0.1, 1.0, 10.0, 100.0, 1000.0],
   "pls_parameters": [1, 2, 4],
+  "gpr_parameters": [
+    {"pca_components": 4, "length_scale": 2.0, "noise_level": 0.05, "optimize_kernel": true},
+    {"pca_components": 8, "length_scale": 3.0, "noise_level": 0.05, "optimize_kernel": true},
+    {"pca_components": 16, "length_scale": 4.0, "noise_level": 0.05, "optimize_kernel": true}
+  ],
   "residual_variance_target": 0.9,
   "maximum_residual_components": 8,
   "bootstrap_replicates": 10000,

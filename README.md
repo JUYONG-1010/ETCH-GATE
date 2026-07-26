@@ -124,6 +124,63 @@ PLS is used because there are many correlated process features but only 88
 dense-target wafers. The residual map is represented by three training-fitted
 PCA components in every outer fold.
 
+## Why Ridge, PLS, And GPR
+
+Machine learning is not limited to these three models. They are the primary
+shortlist because the verified target set contains only 88 wafers, while the
+cycle-aware process representation has 310 candidate features and many sensor
+summaries are correlated. The benchmark therefore prioritizes low-capacity
+models that can be tuned inside grouped cross-validation and interpreted at
+the lot level.
+
+| Model | Question answered | Reason for inclusion |
+|---|---|---|
+| Ridge | Does a regularized linear model already explain the process-dependent shift? | It is a stable minimum-complexity baseline when the number of correlated features is large relative to the wafer count. |
+| PLS | Can supervised latent components compress correlated process traces without discarding target-relevant variation? | It supports the small-sample, correlated-input, multi-output map problem and is the current best validated process-only model. |
+| GPR | Is there reproducible nonlinear improvement, and can the model expose predictive uncertainty? | The dataset is small enough for CPU-scale GPR, and prior work on this BOSCH dataset reports GPR for scalar etch-depth VM. Its raw variance is audited rather than assumed to be calibrated. |
+
+Deep neural networks are not a primary baseline because 88 labeled maps do not
+support estimating a high-capacity model from scratch. Random forests,
+boosting, SVR, and neural networks remain possible sensitivity experiments,
+not assumed improvements. A complex model is retained only if it improves the
+same nested leave-one-lot-out test across multiple lots rather than obtaining
+an isolated gain on one split. The coordinate template remains the non-ML
+control for every learned model.
+
+All three models were evaluated using the same direct 89-point stepheight
+target, outer lot holds, inner lot-wise tuning, features, and metrics. GPR uses
+training-fold PCA and a Constant-RBF-White kernel; PCA dimension is selected by
+inner lot-wise validation and kernel parameters are optimized without the outer
+test lot. This makes model class the main changed variable instead of changing
+the target or test split.
+
+| Full-map model | Wafer-macro MAE | Wafer-macro RMSE | Lots with lowest MAE |
+|---|---:|---:|---:|
+| Ridge | 0.1533 um | 0.2089 um | 2/10 |
+| **PLS** | **0.1435 um** | **0.1976 um** | **7/10** |
+| GPR | 0.1574 um | 0.2184 um | 1/10 |
+
+GPR is `9.7%` worse than PLS in wafer-macro MAE; a 10,000-repeat lot-cluster
+bootstrap places the relative degradation at `3.6%-16.1%`. PLS beats GPR in
+nine of ten held-out lots. Raw GPR standard deviation is also a weak error
+ranking signal (`Spearman rho = 0.144`, `p = 0.181`; top-20% high-error capture
+`33.3%`) and is rejected for metrology routing. The simpler PLS model remains
+the process-only baseline.
+
+<p align="center">
+  <img src="./docs/figures/model_benchmark/model-benchmark-dashboard.png"
+       alt="Ridge PLS and GPR unseen-lot benchmark with Lot 8 wafer maps"
+       width="100%">
+</p>
+
+Computer specifications should change runtime and memory use, not the reported
+accuracy. With identical data, code, library versions, hyperparameters, and
+random seeds, CPU implementations of Ridge, PLS, and GPR should reproduce the
+same result up to insignificant floating-point differences. Hardware can
+indirectly change a study only when it permits a larger search, a different
+model, or nondeterministic GPU operations; those are protocol changes and must
+be reported rather than attributed to a faster computer.
+
 ## Leakage Prevention
 
 Entire lots, not individual points or random wafer rows, are held out.
@@ -212,6 +269,13 @@ online VM and dynamic-sampling work.
 
 ## Why OES Cannot Be Used Raw
 
+OES is **additional in-situ sensing, not additional wafer metrology**. It
+records plasma-emitted light during the existing etch recipe. P-17 stepheight
+is different: the wafer is measured after processing and that direct result is
+the metrology label. An OES-equipped tool has hardware and maintenance cost,
+but collecting its trace does not require routing each wafer to a separate
+post-process measurement step.
+
 OES measures plasma-emission intensity over `3,648` wavelengths at `25 Hz`.
 For an approximately 600-second process, one wafer may contain about:
 
@@ -243,6 +307,51 @@ OES remains only if it improves unseen-lot prediction or low-budget risk
 ranking. PCA explained variance by itself is not accepted as evidence of
 metrology value. A one-day file can verify decoding and cycle alignment but
 cannot establish unseen-lot ML improvement.
+
+The preregistered one-day gate uses the July 5 file (`833,563,333` bytes,
+official MD5 verified). All ten wafer groups pass:
+
+| Check | Result |
+|---|---:|
+| Shared wavelength grid | 3,648 channels, 185.89-883.97 nm |
+| Effective median sample rate | 24.05 Hz |
+| Largest observed timestamp gap | 1.307 s |
+| Maximum OES/process duration mismatch | 0.737 s |
+| Dictionary codes and active-window coverage | 10/10 pass |
+
+Target-free streaming extraction produces seven cycle/phase statistics per
+wavelength, or `25,536` candidate OES features per wafer, without loading a
+whole day into memory. The preregistered four-lot pilot compared a PLS model
+using process data alone against the same model plus OES features, with each
+held-out lot excluded from all fitting and selection. OES did **not** clear the
+retention gate: lot-macro MAE changed from `0.3387` to `0.3444 um` (-1.68%
+reduction; worse), and only 2 of 4 lots improved. The raw-fusion design is
+therefore stopped rather than expanded to the remaining OES days.
+
+<p align="center">
+  <img src="./docs/figures/oes/oes-one-day-gate.png"
+       alt="One-day OES spectrum integrity and process-time alignment dashboard"
+       width="100%">
+</p>
+
+<p align="center">
+  <img src="./docs/figures/oes/oes-four-lot-pilot.png"
+       alt="Four-lot OES pilot decision dashboard"
+       width="100%">
+</p>
+
+The follow-up physics-constrained OES test also failed: it restricted OES to
+the wafer-global stepheight mean shift, retained process PLS for spatial
+residuals, and used broadband-normalized spectral shape with training-fold-only
+PCA. Its lot-macro MAE was `0.4142 um` versus `0.3387 um` for process-only PLS
+(-22.27% reduction; worse), with improvement in only 1 of 4 lots. OES is not
+expanded further for this target.
+
+<p align="center">
+  <img src="./docs/figures/oes/oes-v2-physics-constrained.png"
+       alt="Physics-constrained OES result with matched-scale wafer maps"
+       width="100%">
+</p>
 
 Fraunhofer ENAS describes OES as a fast in-situ method for tracking plasma
 condition changes and explicitly lists PCA and virtual metrology for spectral
@@ -291,9 +400,12 @@ python -m ruff check .
 - [Process and measurement lineage](docs/PROCESS_AND_MEASUREMENT_LINEAGE.md)
 - [Target decomposition results](docs/TARGET_TEMPLATE_RESULTS.md)
 - [Process-only model results](docs/PROCESS_BASELINE_RESULTS.md)
+- [Ridge, PLS, and GPR benchmark](docs/MODEL_BENCHMARK_RESULTS.md)
+- [One-day OES integrity and alignment gate](docs/OES_ONE_DAY_GATE_RESULTS.md)
+- [Four-lot OES incremental-value pilot](docs/OES_PILOT_RESULTS.md)
+- [Physics-constrained OES V2 result](docs/OES_V2_RESULTS.md)
 - [Failure-risk results](docs/DRIFT_RISK_RESULTS.md)
 - [Leakage-safe split protocol](docs/SPLIT_PROTOCOL.md)
-- [Industry alignment and claim register](docs/INDUSTRY_ALIGNMENT.md)
 - [Complete project log](PROJECT_LOG.md)
 
 ## Current Limitations
@@ -307,7 +419,8 @@ python -m ruff check .
 4. The current risk policy ranks measurements but does not yet learn from the
    selected measurement feedback.
 5. Low-budget ranking improvement remains modest.
-6. OES has not yet been decoded or evaluated.
+6. Both raw OES fusion and the compact physics-constrained OES V2 failed their
+   four-lot unseen-lot gates; OES will not be expanded for this target.
 7. Dektak/P-17 comparisons cannot be called traceable physical calibration.
 ```
 
@@ -319,7 +432,9 @@ python -m ruff check .
 - [SEMI ASMC 2024 ML-based VM in advanced process control](https://www.semi.org/en/advanced-semiconductor-manufacturing-conference-asmc/2024-session-15-advanced-process-control-2)
 - [2024 real-world multi-source plasma-etch VM](https://link.springer.com/article/10.1007/s10479-024-06179-y)
 - [2024 IEEE entire-spectrum OES VM](https://doi.org/10.1109/TSM.2024.3416844)
-- [ASML ML-guided inspection sampling](https://www.asml.com/en/investors/annual-report/2025/strategy-and-stories)
+- [2026 GPR virtual metrology on the BOSCH dataset](https://doi.org/10.1117/12.3089815)
+- [scikit-learn cross-decomposition and PLS documentation](https://scikit-learn.org/stable/modules/cross_decomposition.html)
+- [scikit-learn Gaussian-process documentation](https://scikit-learn.org/stable/modules/gaussian_process.html)
 
 ## Git Policy
 

@@ -1,0 +1,25 @@
+{
+  "selected_lots": [
+    2,
+    4,
+    6,
+    9
+  ],
+  "dense_wafers": 39,
+  "process_features": 310,
+  "oes_features": 25536,
+  "combined_features": 25846,
+  "process_only_wafer_macro_mae": 0.34174499373611766,
+  "process_oes_wafer_macro_mae": 0.34862378757041806,
+  "process_only_lot_macro_mae": 0.3387214048525108,
+  "process_oes_lot_macro_mae": 0.34442486522890187,
+  "lot_macro_relative_mae_reduction": -0.01683820477443554,
+  "lots_improved": 2,
+  "total_lots": 4,
+  "retain_gate": {
+    "relative_mae_reduction_minimum": 0.05,
+    "lots_improved_minimum": 3,
+    "total_pilot_lots": 4
+  },
+  "passes_retain_gate": false
+}

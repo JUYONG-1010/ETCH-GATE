@@ -1,0 +1,9 @@
+held_out_lot,family,training_wafers,test_wafers,retained_features,mean_parameter,mean_fitted_model,mean_inner_lot_macro_mae,residual_parameter,residual_fitted_model,residual_inner_lot_macro_rmse,residual_components,residual_explained_variance,oes_shape_features,oes_retained_features,oes_settings,oes_inner_lot_macro_mae
+2,process_only_pls,29,10,241.0,1.0,,0.25908150330879,1.0,,0.344154357607891,2,0.9808429528933801,,,,
+4,process_only_pls,29,10,235.0,2.0,,0.187378540152789,1.0,,0.3411029411661248,2,0.9795383489184702,,,,
+6,process_only_pls,29,10,241.0,1.0,,0.20746473699578757,2.0,,0.09368351661074537,2,0.9325294870036375,,,,
+9,process_only_pls,30,9,241.0,1.0,,0.264518579192277,1.0,,0.33447084520351106,2,0.9832744822579009,,,,
+2,physics_constrained_oes_v2,29,10,,,,,1.0,,0.344154357607891,2,,21888.0,21888.0,pca=8;alpha=1,0.40020945623002313
+4,physics_constrained_oes_v2,29,10,,,,,1.0,,0.3411029411661248,2,,21888.0,21888.0,pca=2;alpha=1,0.36444435871058584
+6,physics_constrained_oes_v2,29,10,,,,,2.0,,0.09368351661074537,2,,21888.0,21888.0,pca=2;alpha=100,0.4116404098775561
+9,physics_constrained_oes_v2,30,9,,,,,1.0,,0.33447084520351106,2,,21888.0,21888.0,pca=2;alpha=100,0.39719471652835936

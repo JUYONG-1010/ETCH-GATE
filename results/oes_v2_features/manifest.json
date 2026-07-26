@@ -1,0 +1,5 @@
+{
+  "wafer_count": 40,
+  "feature_count": 21888,
+  "normalization": "each OES row divided by broadband intensity"
+}

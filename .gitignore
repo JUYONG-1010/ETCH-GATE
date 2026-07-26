@@ -13,6 +13,10 @@ data/bosch_raw/*
 outputs/
 reports/
 tmp/
+private/
+results/oes_feature_pilot/oes_features.csv
+results/oes_four_lot_features/oes_features.csv
+results/oes_v2_features/normalized_oes_shape_features.csv
 src/*.egg-info/
 
 # Local tools and editors

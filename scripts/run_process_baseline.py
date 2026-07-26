@@ -5,12 +5,13 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import time
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-from etch_gate.analysis.process_baseline import evaluate_process_baselines
+from etch_gate.analysis.process_baseline import GPRSettings, evaluate_process_baselines
 from etch_gate.data.process import build_process_feature_table, load_process_traces
 from etch_gate.visualization.process_baseline import (
     plot_process_cycle_atlas,
@@ -85,6 +86,7 @@ def _cluster_bootstrap_summary(
 
 
 def main() -> None:
+    started = time.perf_counter()
     args = parse_args()
     config = json.loads(args.config.read_text(encoding="utf-8"))
     traces = load_process_traces(
@@ -100,6 +102,10 @@ def main() -> None:
         families=tuple(config["families"]),
         ridge_parameters=tuple(config["ridge_parameters"]),
         pls_parameters=tuple(config["pls_parameters"]),
+        gpr_parameters=tuple(
+            GPRSettings(**parameters)
+            for parameters in config.get("gpr_parameters", [])
+        ),
         residual_variance_target=config["residual_variance_target"],
         maximum_residual_components=config["maximum_residual_components"],
     )
@@ -157,6 +163,7 @@ def main() -> None:
             )
             for family in config["families"]
         ],
+        "model_evaluation_runtime_seconds": time.perf_counter() - started,
         "claim_boundary": {
             "gas_channel_chemical_identity_known": False,
             "oes_used": False,

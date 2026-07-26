@@ -1,0 +1,27 @@
+{
+  "analysis": "physics_constrained_compact_oes_pilot_v2",
+  "target": "direct_89_point_stepheight",
+  "selected_lots": [2, 4, 6, 9],
+  "outer_split": "leave_one_selected_lot_out",
+  "inner_split": "leave_one_training_lot_out",
+  "hypothesis": "A chamber-level OES signal should predict only wafer-global stepheight mean shift; process features retain ownership of the spatial residual map.",
+  "oes_preprocessing": {
+    "row_normalization": "divide each OES spectrum by its broadband intensity before phase averaging",
+    "phase_summaries": ["active", "early", "late", "long_phase", "short_phase", "cycle_slope"],
+    "latent_representation": "training-fold-only SVD/PCA",
+    "candidate_latent_components": [2, 4, 8]
+  },
+  "mean_shift_model": {
+    "family": "ridge",
+    "candidate_alpha": [1.0, 10.0, 100.0]
+  },
+  "spatial_residual_model": "frozen_process_only_pls",
+  "primary_metric": "lot_macro_full_map_mae",
+  "retain_gate": {
+    "relative_mae_reduction_minimum": 0.05,
+    "lots_improved_minimum": 3,
+    "total_pilot_lots": 4
+  },
+  "failure_rule": "Do not download remaining OES days or claim OES metrology value if either gate fails.",
+  "visualization_requirement": "Every result dashboard must include measured wafer map, process-only prediction, physics-constrained prediction, and matched-scale error maps."
+}

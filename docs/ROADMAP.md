@@ -49,8 +49,15 @@ low-budget policy.
 ## Milestone 5 - One-Day OES Gate
 
 Download one daily OES file, validate dictionary decoding and cycle alignment,
-then test fold-local OES features. Download all OES only after a credible
-process-only improvement signal; retain OES as secondary if gain is below 5%.
+then stop before making any accuracy claim because one day contains only one
+lot. **Completed:** the July 5 file passes dictionary, wavelength, timestamp,
+wafer-key, and process-window alignment checks for all ten wafers.
+
+The next preregistered pilot uses Lots 2, 4, 6, and 9, selected to span the
+chronology before OES model results are observed. OES reduction remains inside
+training folds. Download the remaining daily OES only if process+OES lowers
+lot-macro full-map MAE by at least 5% and improves at least three of four pilot
+lots. A four-lot pass is a download gate, not a final generalization claim.
 
 ## Milestone 6 - Calibrated Uncertainty
 
@@ -67,14 +74,14 @@ causal feedback model that can use only previously measured wafers. Reject any
 policy that misses its 10% AURC-improvement gate. Actual
 Dektak/P-17 fusion remains out of scope.
 
-## Milestone 8 - Reproduction and Portfolio
+## Milestone 8 - Reproducible Release
 
 Run clean-environment tests, Ruff, checksum and claim audits, create final
-publication-quality figures, then commit and push once after user approval.
+publication-quality figures, then commit and push once after the final audit.
 
 ## Global Rule
 
 Advance one milestone at a time. Failed experiments remain documented.
-No milestone or claim changes until `INDUSTRY_ALIGNMENT.md` records a primary
+No milestone or claim changes until the experiment record includes a primary
 source, dataset support, leakage-safe comparison, numerical gate, and allowed
 claim.

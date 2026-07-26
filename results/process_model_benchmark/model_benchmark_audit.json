@@ -1,0 +1,18 @@
+{
+  "primary_model": "pls",
+  "gpr_relative_mae_change_vs_pls": 0.09695539979155776,
+  "gpr_relative_mae_change_lot_bootstrap_95_interval": [
+    0.03580270281984521,
+    0.16112702888626385
+  ],
+  "pls_lot_wins_over_gpr": 9,
+  "total_lots": 10,
+  "gpr_uncertainty_wafer_mae_spearman_rho": 0.14395406995174528,
+  "gpr_uncertainty_wafer_mae_spearman_p": 0.1808698843271342,
+  "gpr_top_20_percent_error_capture": 0.3333333333333333,
+  "gpr_raw_pointwise_95_interval_coverage": 0.8848314606741573,
+  "gpr_mean_pointwise_standard_deviation_um": 0.18279910218976061,
+  "uncertainty_claim": "uncalibrated proxy; rejected for metrology routing",
+  "bootstrap_replicates": 10000,
+  "random_seed": 20260721
+}

@@ -1,0 +1,21 @@
+{
+  "selected_lots": [
+    2,
+    4,
+    6,
+    9
+  ],
+  "dense_wafers": 39,
+  "oes_shape_features": 21888,
+  "physics_constrained_lot_macro_mae": 0.41415539216300296,
+  "process_only_lot_macro_mae": 0.3387214048525108,
+  "lot_macro_relative_mae_reduction": -0.22270215649152236,
+  "lots_improved": 1,
+  "total_lots": 4,
+  "retain_gate": {
+    "relative_mae_reduction_minimum": 0.05,
+    "lots_improved_minimum": 3,
+    "total_pilot_lots": 4
+  },
+  "passes_retain_gate": false
+}

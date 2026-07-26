@@ -84,8 +84,10 @@ The next gate is:
 1. freeze process-only baselines using the verified 31 common traces;
 2. download one representative 10-wafer daily OES file;
 3. verify decoding, timestamps, wafer keys, and BOSCH cycle alignment;
-4. retain full OES only if fold-local OES features reduce unseen-lot
-   process-only macro error by at least 5%.
+4. preregister a chronologically distributed four-lot pilot because one lot
+   cannot measure unseen-lot improvement;
+5. retain full OES only if fold-local OES features reduce pilot lot-macro
+   process-only error by at least 5% and improve at least three of four lots.
 
 ## Reproduce
 
