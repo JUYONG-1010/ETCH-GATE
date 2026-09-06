@@ -64,7 +64,7 @@ def main() -> None:
         "eligible_test_lots": sorted(
             result.wafer_metrics["lot_number"].unique().tolist()
         ),
-        "family_macro_comparison": macro.to_dict(orient="records"),
+        "family_macro_comparison": json.loads(macro.to_json(orient="records", double_precision=15)),
         "claim_boundaries": [
             "LOLO evaluates domain generalization",
             "expanding-window evaluates strict forward deployment",

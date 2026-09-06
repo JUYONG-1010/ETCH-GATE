@@ -39,9 +39,14 @@ def parse_args() -> argparse.Namespace:
 
 def _cache_key(step: Step, raw_inputs: list[Path]) -> dict[str, object]:
     files = [Path(step.command[1]), *raw_inputs]
+    root = Path(__file__).resolve().parents[1]
+    files.extend(sorted((root / "src").rglob("*.py")))
+    files.extend(sorted((root / "scripts").glob("*.py")))
+    files.extend([root / "pyproject.toml", root / "requirements.txt"])
     if step.config is not None:
         files.append(step.config)
     return {
+        "python": sys.version,
         "command": step.command,
         "sha256": {str(path): sha256_file(path) for path in files},
     }
@@ -54,8 +59,11 @@ def _run_step(step: Step, raw_inputs: list[Path], *, force: bool) -> str:
     if (
         not force
         and cache_path.is_file()
-        and json.loads(cache_path.read_text(encoding="utf-8")) == key
         and all(path.is_file() for path in step.expected_results)
+        and json.loads(cache_path.read_text(encoding="utf-8")) == {
+            "inputs": key,
+            "results": {str(p): sha256_file(p) for p in step.expected_results},
+        }
     ):
         return "REUSED"
     started = perf_counter()
@@ -83,7 +91,10 @@ def _run_step(step: Step, raw_inputs: list[Path], *, force: bool) -> str:
         step.result_dir / f"reproduction_manifest_{step.name}.json",
         manifest,
     )
-    cache_path.write_text(json.dumps(key, indent=2), encoding="utf-8")
+    cache_path.write_text(json.dumps({
+        "inputs": key,
+        "results": {str(p): sha256_file(p) for p in step.expected_results},
+    }, indent=2), encoding="utf-8")
     return "RAN"
 
 
@@ -352,6 +363,11 @@ def main() -> None:
             script("verify_claims.py"),
             "--repo-root",
             str(root),
+            "--result-root",
+            str(output_root.resolve()),
+            "--skip-oes",
+            "--report",
+            str((output_root / "claim_audit/report.md").resolve()),
             "--output-dir",
             str(output_root / "claim_audit"),
         ],
