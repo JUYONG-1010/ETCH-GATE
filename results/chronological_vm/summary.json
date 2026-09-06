@@ -44,7 +44,7 @@
     {
       "scope": "macro",
       "family": "gpr",
-      "lot_number": NaN,
+      "lot_number": null,
       "lolo_mae": 0.19083905915591165,
       "chronological_mae": 0.21018270311698414,
       "relative_degradation": 0.10136103189058976
@@ -52,7 +52,7 @@
     {
       "scope": "macro",
       "family": "pls",
-      "lot_number": NaN,
+      "lot_number": null,
       "lolo_mae": 0.14456810534717526,
       "chronological_mae": 0.17369843616464958,
       "relative_degradation": 0.2014990149280773
@@ -60,7 +60,7 @@
     {
       "scope": "macro",
       "family": "ridge",
-      "lot_number": NaN,
+      "lot_number": null,
       "lolo_mae": 0.15665422025922585,
       "chronological_mae": 0.1937373608222985,
       "relative_degradation": 0.236719703444368
