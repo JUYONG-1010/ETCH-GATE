@@ -61,6 +61,8 @@ def test_oes_group_to_key_uses_file_date_and_group_wafer() -> None:
 
 
 def test_oes_audit_and_preview_decode_without_loading_targets() -> None:
+    # Keep netCDF fixture paths relative (Windows HDF5 Unicode-path limitation).
+    Path("tmp").mkdir(exist_ok=True)
     with TemporaryDirectory(dir=Path("tmp")) as temporary_directory:
         oes_path, dictionary_path = _write_oes_fixture(Path(temporary_directory))
         audit, wavelengths, manifest = audit_oes_day(
