@@ -1,9 +1,7 @@
 {
   "overall_status": "QUALIFIED",
   "not_run_items": [],
-  "excluded_items": [
-    "Section 17 employment and interview deliverables"
-  ],
+  "record_scope": "Historical July 2026 model validation, not a fresh September full-data rerun",
   "gates": {
     "cycle_segmentation": "PASS",
     "residual_spatial_contribution": "PASS",
@@ -18,9 +16,7 @@
     "reproduction_cache": "11/11 REUSED",
     "ruff": "PASS",
     "tests": "41/41 PASS",
-    "claim_checks": "14/14 PASS",
-    "commit_performed": false,
-    "push_performed": false
+    "claim_checks": "14/14 historical text-only checks; superseded by results/claim_audit"
   },
   "claim_boundary": "Failed gates are retained as negative results and are not promoted to deployment claims."
 }
