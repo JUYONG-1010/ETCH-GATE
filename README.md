@@ -263,7 +263,9 @@ predictions, intervals, and earlier causal decisions do not change.
 Python 3.10 and 3.11 are tested in CI. Raw BOSCH files are not committed.
 
 ```bash
+python -m pip install -r requirements.txt
 python -m pip install -e .
+python scripts/verify_claims.py
 python scripts/run_full_reproduction.py \
   --data-dir data/bosch_raw \
   --output-root results/reproduction \
@@ -273,6 +275,11 @@ python -m pytest -q
 ```
 
 Detailed result reports:
+
+The claim audit runs from the committed result artifacts without downloading raw
+data. Full reproduction writes and audits its own new result directory; the
+separate OES pilot is not part of that eleven-stage process-only run. Cached
+steps are invalidated by code, configuration, input, or result-file changes.
 
 - [Cycle validation](docs/CYCLE_VALIDATION_RESULTS.md)
 - [Feature ablation](docs/FEATURE_ABLATION_RESULTS.md)
