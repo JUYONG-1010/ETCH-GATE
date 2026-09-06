@@ -1,0 +1,88 @@
+{
+  "milestone": 2,
+  "analysis": "lot_aware_target_template_decomposition",
+  "source_file": "data/bosch_raw/Si_Oxide_etch_89_points.csv",
+  "source_sha256": "95def8cab01f5046cdce9b6186614431e716a644fc0bd33d6e098d3768c62ad4",
+  "configuration": {
+    "milestone": 2,
+    "primary_target": "stepheight",
+    "targets": [
+      "stepheight",
+      "oxide_etch",
+      "si_etch"
+    ],
+    "representative_wafer": "2024-07-02_01",
+    "outer_split": "leave_one_lot_out",
+    "template_dominance_threshold": 0.95,
+    "raw_map_r2_headline_allowed_when_template_dominant": false
+  },
+  "metrics": [
+    {
+      "target": "stepheight",
+      "rows": 7832,
+      "wafers": 88,
+      "lots": 10,
+      "global_r2": -0.0002618986115681121,
+      "template_r2": 0.982595724554012,
+      "template_dominant": true,
+      "template_dominance_threshold": 0.95,
+      "true_mean_shift_oracle_r2": 0.9948356889633444,
+      "template_mae": 0.3520144117265253,
+      "template_lot_macro_mae": 0.35088005018411544,
+      "true_mean_shift_oracle_mae": 0.09913406332440182,
+      "true_mean_shift_oracle_lot_macro_mae": 0.0981354546225947,
+      "wafer_residual_rmse_mean": 0.15180462614496584,
+      "wafer_residual_rmse_median": 0.11994380737085392,
+      "mean_shift_standard_deviation": 0.4023012348766115,
+      "postoxide_filled_rows": 157
+    },
+    {
+      "target": "oxide_etch",
+      "rows": 7832,
+      "wafers": 88,
+      "lots": 10,
+      "global_r2": -0.06816693770641025,
+      "template_r2": 0.022118948133324268,
+      "template_dominant": false,
+      "template_dominance_threshold": 0.95,
+      "true_mean_shift_oracle_r2": 0.40532402821699043,
+      "template_mae": 0.0529236002895216,
+      "template_lot_macro_mae": 0.052472822099267534,
+      "true_mean_shift_oracle_mae": 0.04989738504288324,
+      "true_mean_shift_oracle_lot_macro_mae": 0.04930026325946643,
+      "wafer_residual_rmse_mean": 0.057950813965941525,
+      "wafer_residual_rmse_median": 0.05637632246863375,
+      "mean_shift_standard_deviation": 0.04813033412871053,
+      "postoxide_filled_rows": 157
+    },
+    {
+      "target": "si_etch",
+      "rows": 7832,
+      "wafers": 88,
+      "lots": 10,
+      "global_r2": -0.00029347567824977716,
+      "template_r2": 0.9819866094610754,
+      "template_dominant": true,
+      "template_dominance_threshold": 0.95,
+      "true_mean_shift_oracle_r2": 0.9945360714554642,
+      "template_mae": 0.3588959278011757,
+      "template_lot_macro_mae": 0.3580693196821122,
+      "true_mean_shift_oracle_mae": 0.11310662591624777,
+      "true_mean_shift_oracle_lot_macro_mae": 0.11256257045314644,
+      "wafer_residual_rmse_mean": 0.16711058677051394,
+      "wafer_residual_rmse_median": 0.1259194071239339,
+      "mean_shift_standard_deviation": 0.4066874648012561,
+      "postoxide_filled_rows": 157
+    }
+  ],
+  "provenance": {
+    "stepheight": "direct 89-point profilometer measurement",
+    "oxide_etch": "derived from pre/post oxide; pre-etch dense values are mostly IDW from 15 points and 157 failed post-etch fits are released with IDW fills",
+    "si_etch": "derived as stepheight minus oxide etch"
+  },
+  "claim_boundary": {
+    "template_plus_true_mean_shift_is_oracle": true,
+    "raw_map_r2_excluded_when_template_r2_at_least": 0.95,
+    "production_specification_available": false
+  }
+}
