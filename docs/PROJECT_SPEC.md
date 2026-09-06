@@ -56,7 +56,7 @@ least 5%.
 
 Every scope or method change must first satisfy the source, data-support,
 experiment, numerical-gate, and claim-boundary fields in
-`INDUSTRY_ALIGNMENT.md`. User suggestions and model suggestions are hypotheses,
+`EVALUATION_PROTOCOL.md`. Proposed methods are hypotheses,
 not evidence by themselves.
 
 ## Visual Evidence
@@ -76,7 +76,7 @@ needed to interpret the result without relying on hidden narrative.
 - [Official dataset and license](https://doi.org/10.5281/zenodo.17122442)
 - [NIST 2025 virtual metrology and dynamic sampling study](https://doi.org/10.1109/TSM.2025.3531920)
 - [2026 Time-LLM BOSCH spatial-profile study](https://arxiv.org/abs/2603.23576)
-- [Industry alignment and decision register](INDUSTRY_ALIGNMENT.md)
+- [Evaluation protocol](EVALUATION_PROTOCOL.md)
 
 ## Non-Goals
 

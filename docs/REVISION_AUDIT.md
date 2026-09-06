@@ -2,8 +2,8 @@
 
 Audit date: 2026-07-26
 
-Scope: repository state before the full validation revision. Employment and
-interview deliverables in master-prompt section 17 are explicitly excluded.
+Scope: historical repository state before the July 2026 validation revision.
+The findings below describe that earlier snapshot, not current open issues.
 
 ## Resolution
 
@@ -16,7 +16,6 @@ in-scope items.
 
 - Branch: `main`
 - Baseline commit: `c9a2ed6`
-- Local pre-existing untracked file: `scripts/create_final_paper.py`
 - Raw process data: present (`Process_data.nc`, `Dictionary_process.nc`)
 - Direct dense target: present (`Si_Oxide_etch_89_points.csv`)
 - Downloaded OES days: four; existing negative OES results are retained
